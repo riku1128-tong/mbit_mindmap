@@ -527,7 +527,7 @@ function forceLayout(seed) {
       if (d < 0.01) { dx = 0.01 * (i - j); dy = 0.01; d = Math.hypot(dx, dy); }
       const L = 125 + (MAX_SCORE - S[i][j]) * 4.4;
       let f = (d - L) / d * 0.06 * alpha;
-      if (d < 105) f -= (105 - d) / d * 0.5;
+      if (d < 128) f -= (128 - d) / d * 0.5;
       P[i].x += dx * f; P[i].y += dy * f;
       P[j].x -= dx * f; P[j].y -= dy * f;
     }
