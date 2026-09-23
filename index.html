@@ -10,6 +10,14 @@ body{margin:0;font-family:system-ui,sans-serif;font-size:14px;background:#F1F4F1
 img{max-width:100%}
 [hidden]{display:none!important}
 </style>
+<script>
+// 既定はダークモード。ライトを選んだ人だけ保存した設定に従う（描画前に適用してちらつきを防ぐ）
+(function () {
+  var t = 'dark';
+  try { if (localStorage.getItem('mbti-compat-map-theme') === 'light') t = 'light'; } catch (e) {}
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
 <title>MBTI相性マップ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,6 +62,7 @@ button{cursor:pointer}
 .top{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding-block:14px 12px}
 .top h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0;letter-spacing:.02em}
 .top p{margin:0;color:var(--ink-2);font-size:13px}
+.themebtn{margin-left:auto;align-self:center;background:var(--surface)}
 
 .app{flex:1;min-height:0;display:grid;grid-template-columns:350px minmax(0,1fr);gap:16px;padding-bottom:16px}
 .side{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding-right:2px}
@@ -242,6 +251,7 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 <header class="top">
   <h1>MBTI相性マップ</h1>
   <p>メンバーのタイプを入れると、お互いの相性をマインドマップで可視化します</p>
+  <button class="btn ghost small themebtn" id="themeBtn" type="button" aria-label="ライトモードに切り替え">☀ ライト</button>
 </header>
 
 <main class="app">
@@ -305,10 +315,10 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 /* ---------- MBTI data ---------- */
 const TYPES = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
 const DESC = {
-  INTJ:'戦略家', INTP:'分析家', ENTJ:'統率者', ENTP:'発明家',
-  INFJ:'洞察者', INFP:'理想家', ENFJ:'教導者', ENFP:'情熱家',
-  ISTJ:'堅実家', ISFJ:'守護者', ESTJ:'管理者', ESFJ:'世話役',
-  ISTP:'職人',   ISFP:'芸術家', ESTP:'挑戦者', ESFP:'盛り上げ役'
+  INTJ:'建築家', INTP:'論理学者', ENTJ:'指揮官', ENTP:'討論者',
+  INFJ:'提唱者', INFP:'仲介者',   ENFJ:'主人公', ENFP:'広報運動家',
+  ISTJ:'管理者', ISFJ:'擁護者',   ESTJ:'幹部',   ESFJ:'領事',
+  ISTP:'巨匠',   ISFP:'冒険家',   ESTP:'起業家', ESFP:'エンターテイナー'
 };
 const GROUPS = { nt:'NT 理論派', nf:'NF 理想派', sj:'SJ 堅実派', sp:'SP 行動派' };
 const FN_NAME = { Ne:'外向直観', Ni:'内向直観', Se:'外向感覚', Si:'内向感覚', Te:'外向思考', Ti:'内向思考', Fe:'外向感情', Fi:'内向感情' };
@@ -1078,6 +1088,21 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
   if (state.pair) clearPair(); else if (state.mode === 'focus') toOverview();
 });
+
+/* ---------- theme ---------- */
+const themeBtn = document.getElementById('themeBtn');
+function renderThemeBtn() {
+  const dark = document.documentElement.getAttribute('data-theme') !== 'light';
+  themeBtn.textContent = dark ? '☀ ライト' : '☾ ダーク';
+  themeBtn.setAttribute('aria-label', dark ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
+}
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('mbti-compat-map-theme', next); } catch (e) {}
+  renderThemeBtn();
+});
+renderThemeBtn();
 
 /* ---------- boot ---------- */
 if (!load() || (!members.length && !state.isSample)) { if (!members.length) loadSample(); }
