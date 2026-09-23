@@ -218,7 +218,7 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
 .hex .hp{fill:none;stroke:var(--line);stroke-width:1.5}
 .hex .hv{fill:var(--g)}
 .hex .hn{fill:var(--gi);font-family:var(--mono);font-size:12px;font-weight:600;text-anchor:middle;dominant-baseline:central}
-.hex .hl{fill:var(--ink-2);font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.hex .hl{fill:var(--ink-2);font-size:11px;font-weight:700;dominant-baseline:central}
 .hex .dim{opacity:.35}
 .hex .selfring{fill:none;stroke:var(--ink);stroke-width:2}
 .hex .self .hl{fill:var(--ink)}
@@ -920,13 +920,15 @@ function pairRow(a, b, c) {
 
 // 六性図。mode 'rate' は self から見た習得率、'count' は系統ごとの人数
 function hexSVG(mode, self) {
-  const cx = 110, cy = 96, R = 64;
+  const cx = 122, cy = 102, R = 64;
   const pt = (i, r) => [cx + r * Math.cos((-90 + i * 60) * Math.PI / 180), cy + r * Math.sin((-90 + i * 60) * Math.PI / 180)];
   const poly = NEN_ORDER.map((k, i) => pt(i, R).map(v => v.toFixed(1)).join(',')).join(' ');
   const counts = {};
   if (mode === 'count') members.forEach(m => { const k = nenOf(m); counts[k] = (counts[k] || 0) + 1; });
   const nodes = NEN_ORDER.map((k, i) => {
-    const [x, y] = pt(i, R), [lx, ly] = pt(i, R + 33);
+    const [x, y] = pt(i, R);
+    // 系統名は丸の外側へ：上下は丸の上/下、左右は丸の横に寄せる
+    const [lx, ly, anchor] = i === 0 ? [x, y - 30, 'middle'] : i === 3 ? [x, y + 31, 'middle'] : i < 3 ? [x + 25, y, 'start'] : [x - 25, y, 'end'];
     let val, dim = false, isSelf = false;
     if (mode === 'rate') {
       isSelf = k === self;
@@ -937,10 +939,10 @@ function hexSVG(mode, self) {
       ${isSelf ? `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="25" class="selfring"/>` : ''}
       <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="20" class="hv"/>
       <text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="hn">${val}</text>
-      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="hl">${NEN[k].name}</text></g>`;
+      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="hl" text-anchor="${anchor}">${NEN[k].name}</text></g>`;
   }).join('');
   const label = mode === 'rate' ? `${NEN[self].name}から見た六性図の習得率` : '六性図での系統ごとの人数';
-  return `<svg class="hex" viewBox="0 0 220 196" role="img" aria-label="${label}"><polygon points="${poly}" class="hp"/>${nodes}</svg>`;
+  return `<svg class="hex" viewBox="0 0 244 206" role="img" aria-label="${label}"><polygon points="${poly}" class="hp"/>${nodes}</svg>`;
 }
 
 function renderTeam() {
