@@ -265,12 +265,16 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
 .branch.sel .vis{stroke-width:7}
 .branch.sel .eb rect{fill:var(--tc)}
 .ring{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:2 5}
-.ringlabel{font-size:11px;fill:var(--ink-2);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.ringlabel{font-size:11px;fill:var(--ink-2)}
 .node{cursor:pointer;outline:none;touch-action:none}
 .node circle{fill:var(--g);stroke:var(--surface);stroke-width:3;transition:stroke .15s}
 .node .nicon{fill:none;stroke:var(--gi);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.node .ncode{font-family:var(--mono)!important;font-size:10.5px;font-weight:500;fill:var(--ink-2);text-anchor:middle;paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round;pointer-events:none}
-.node .nname{font-size:13px;font-weight:700;fill:var(--ink);text-anchor:middle;paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round;pointer-events:none}
+.node .ncode{font-family:var(--mono)!important;font-size:10.5px;font-weight:500;fill:var(--ink-2);text-anchor:middle;pointer-events:none}
+.node .nname{font-size:13px;font-weight:700;fill:var(--ink);text-anchor:middle;pointer-events:none}
+/* 文字の縁取り。Safari（iPad/iPhone）は SVG の paint-order を正しく扱えず縁取りが文字を覆うため、
+   同じ文字を背面にもう1枚置いて縁取りにしている */
+#map .halo{fill:var(--surface);stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+#map .nname.halo{stroke-width:5px}
 .node .ring2{fill:none;stroke:var(--ink);stroke-width:2;opacity:0}
 .node.sel .ring2,.node.hov .ring2,.node:focus-visible .ring2{opacity:1}
 .node:focus-visible .ring2{stroke:var(--accent)}
@@ -290,6 +294,10 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
   .top h1{font-size:20px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* iPhone/iPad の Safari は 16px 未満の入力欄にフォーカスすると画面を拡大するため、タッチ端末では 16px にする */
+@media (pointer:coarse){
+  .field,.mname,.mem select,.nensel select,details.bulk textarea{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -718,6 +726,12 @@ function el(tag, attrs, parent) {
   if (parent) parent.appendChild(e);
   return e;
 }
+// 縁取り付きの文字（背面に縁取り用の複製、前面に本文）
+function haloText(parent, cls, attrs, text) {
+  const h = el('text', { ...attrs, class:`${cls} halo`, 'aria-hidden':'true' }, parent); h.textContent = text;
+  const t = el('text', { ...attrs, class:cls }, parent); t.textContent = text;
+  return t;
+}
 function makeBadge(parent, score) {
   const g = el('g', { class:'eb' }, parent);
   el('rect', { x:-17, y:-10, width:34, height:20, rx:10 }, g);
@@ -744,8 +758,7 @@ function rebuildScene() {
     for (const t of TIERS.slice(0, 3)) {
       const r = focusRadius(t.min);
       el('circle', { class:'ring', r, cx:0, cy:0 }, gRings);
-      const lbl = el('text', { class:'ringlabel', x:-r + 6, y:-6 }, gRings);
-      lbl.textContent = `${t.min}+ ${t.name}`;
+      haloText(gRings, 'ringlabel', { x:-r + 6, y:-6 }, `${t.min}+ ${t.name}`);
     }
     members.filter(m => m.id !== c.id).forEach((m, i) => {
       const cc = compat(keyOf(c), keyOf(m));
@@ -770,8 +783,8 @@ function rebuildScene() {
     const size = isCenter ? 36 : 28;
     const ic = el('g', { class:'nicon', transform:`translate(${-size / 2},${-size / 2}) scale(${size / 24})` }, g);
     ic.innerHTML = iconOf(m);
-    const nm = el('text', { class:'nname', y:r + 18 }, g); nm.textContent = m.name;
-    const code = el('text', { class:'ncode', y:r + 32 }, g); code.textContent = labelOf(m);
+    haloText(g, 'nname', { y:r + 18 }, m.name);
+    haloText(g, 'ncode', { y:r + 32 }, labelOf(m));
     sceneNodes[m.id] = g;
   }
   applyHighlight();
