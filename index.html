@@ -98,8 +98,22 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 .code{white-space:nowrap}
 .g-nt{--g:var(--nt);--gi:var(--on-nt)} .g-nf{--g:var(--nf);--gi:var(--on-nf)}
 .g-sj{--g:var(--sj);--gi:var(--on-sj)} .g-sp{--g:var(--sp);--gi:var(--on-sp)}
-.mname{background:none;border:0;padding:4px 0;text-align:left;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mname:hover{color:var(--accent)}
+
+/* タイプごとの16色。NT=紫系、NF=緑系、SJ=青系、SP=橙系 */
+.ty-INTJ{--c:#4F55C9} .ty-INTP{--c:#7457C9} .ty-ENTJ{--c:#9443B5} .ty-ENTP{--c:#B8418F}
+.ty-INFJ{--c:#1E8A66} .ty-INFP{--c:#4A8F2A} .ty-ENFJ{--c:#138A94} .ty-ENFP{--c:#7E9416}
+.ty-ISTJ{--c:#2B5DA8} .ty-ISFJ{--c:#4D8BD6} .ty-ESTJ{--c:#1D4E7A} .ty-ESFJ{--c:#5B9FC7}
+.ty-ISTP{--c:#7F5A40} .ty-ISFP{--c:#B8732E} .ty-ESTP{--c:#D2502F} .ty-ESFP{--c:#E3A11B;--ci:#2B2105}
+.tyc{--g:var(--c);--gi:var(--ci,#FFFFFF)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .tyc{--g:color-mix(in oklab,var(--c) 74%,#FFFFFF);--gi:#0F1411}
+}
+:root[data-theme="dark"] .tyc{--g:color-mix(in oklab,var(--c) 74%,#FFFFFF);--gi:#0F1411}
+.mname{width:100%;min-width:0;height:30px;background:transparent;border:1px solid transparent;border-radius:8px;padding:0 6px;margin-left:-6px;font-weight:500;text-overflow:ellipsis}
+.mname:hover{border-color:var(--line)}
+.mname:focus{border-color:var(--accent);background:var(--surface);outline:none}
+button.tb{border:0;padding:0;cursor:pointer}
+button.tb:hover{filter:brightness(1.12)}
 .mem select{height:30px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-family:var(--mono);font-size:12px;padding:0 4px;min-width:0}
 .x{width:28px;height:28px;border-radius:8px;border:0;background:transparent;color:var(--ink-2);font-size:17px;line-height:1}
 .x:hover{background:var(--surface-2);color:var(--ink)}
@@ -291,7 +305,7 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
       </details>
       <ul class="members" id="memberList"></ul>
       <div class="memfoot" id="memFoot">
-        <span>名前をクリックでその人中心に表示</span>
+        <span>名前は直接書き換えられます。アイコンでその人中心に表示</span>
         <button class="btn ghost small" id="clearAll" type="button">すべて削除</button>
       </div>
     </section>
@@ -626,7 +640,7 @@ function rebuildScene() {
     const isCenter = state.mode === 'focus' && m.id === state.focusId;
     const r = state.mode === 'overview' ? 30 : (isCenter ? 42 : 28);
     const g = el('g', {
-      class:`node g-${groupOf(m.type)}${isCenter ? ' center' : ''}`, 'data-id':m.id,
+      class:`node tyc ty-${m.type}${isCenter ? ' center' : ''}`, 'data-id':m.id,
       tabindex:0, role:'button', 'aria-label':`${m.name}（${codeOf(m)}）`
     }, gNodes);
     el('circle', { class:'ring2', r:r + 6 }, g);
@@ -763,8 +777,8 @@ function renderMembers() {
   document.getElementById('memFoot').hidden = !members.length;
   memberList.innerHTML = members.map(m => `
     <li class="mem">
-      <span class="tb g-${groupOf(m.type)}" title="${m.type} ${DESC[m.type]}">${iconSVG(m.type)}</span>
-      <button type="button" class="mname" data-focus="${m.id}" title="${esc(m.name)}を中心に表示">${esc(m.name)}</button>
+      <button type="button" class="tb tyc ty-${m.type}" data-focus="${m.id}" title="${esc(m.name)}を中心に表示（${m.type} ${DESC[m.type]}）" aria-label="${esc(m.name)}を中心に表示">${iconSVG(m.type)}</button>
+      <input class="mname" id="name-${m.id}" data-name="${m.id}" value="${esc(m.name)}" maxlength="16" autocomplete="off" aria-label="${esc(m.name)}の名前" title="クリックして名前を書き換え">
       <select id="type-${m.id}" data-type="${m.id}" aria-label="${esc(m.name)}のタイプ">${typeOptions(m.type)}</select>
       <select id="ident-${m.id}" data-ident="${m.id}" aria-label="${esc(m.name)}の5文字目（A/T）" title="A＝自己主張型 / T＝慎重型">
         <option value=""${m.ident ? '' : ' selected'}>—</option><option value="A"${m.ident === 'A' ? ' selected' : ''}>-A</option><option value="T"${m.ident === 'T' ? ' selected' : ''}>-T</option>
@@ -773,7 +787,7 @@ function renderMembers() {
     </li>`).join('');
 }
 
-const personChip = m => `<span class="tb g-${groupOf(m.type)}" role="img" title="${codeOf(m)} ${DESC[m.type]}" aria-label="${codeOf(m)} ${DESC[m.type]}">${iconSVG(m.type)}</span><span class="t">${esc(m.name)}</span>${m.ident ? `<span class="idn">-${m.ident}</span>` : ''}`;
+const personChip = m => `<span class="tb tyc ty-${m.type}" role="img" title="${codeOf(m)} ${DESC[m.type]}" aria-label="${codeOf(m)} ${DESC[m.type]}">${iconSVG(m.type)}</span><span class="t">${esc(m.name)}</span>${m.ident ? `<span class="idn">-${m.ident}</span>` : ''}`;
 
 function pairRow(a, b, c) {
   return `<li><button type="button" class="rowbtn" data-pair="${a.id},${b.id}">
@@ -828,7 +842,7 @@ function renderMember(id) {
   const labels = ['主機能','補助','第三','劣等'];
   detail.innerHTML = `
     <button type="button" class="backlink" data-act="overview">← チーム全体へ</button>
-    <div class="who g-${groupOf(m.type)}">
+    <div class="who tyc ty-${m.type}">
       <span class="badge-type" title="${m.type} ${DESC[m.type]}">${iconSVG(m.type)}</span>
       <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="code">${codeOf(m)}</span> ${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}${m.ident ? ` · ${IDENT[m.ident]}（${m.ident}）` : ''}</div></div>
     </div>
@@ -978,8 +992,26 @@ clearAllBtn.addEventListener('click', () => {
   refresh(true);
 });
 
+// 名前の書き換え（Enterで確定、Escで元に戻す）
+function renameMember(input) {
+  const m = byId(+input.dataset.name); if (!m) return;
+  const v = input.value.trim().slice(0, 16);
+  if (!v) { input.value = m.name; say('名前を空にはできません', true); return; }
+  input.value = v;
+  if (v === m.name) return;
+  m.name = v; state.isSample = false;
+  input.setAttribute('aria-label', `${v}の名前`);
+  rebuildScene(); updatePositions(); renderChrome(); renderPanel(); save();
+  say(`名前を「${v}」に変更しました`);
+}
+memberList.addEventListener('keydown', e => {
+  const t = e.target; if (!t.dataset || !t.dataset.name) return;
+  if (e.key === 'Enter') { e.preventDefault(); t.blur(); }
+  else if (e.key === 'Escape') { const m = byId(+t.dataset.name); if (m) t.value = m.name; t.blur(); }
+});
 memberList.addEventListener('change', e => {
   const t = e.target;
+  if (t.dataset.name) { renameMember(t); return; }
   const m = byId(+(t.dataset.type || t.dataset.ident)); if (!m) return;
   if (t.dataset.type) m.type = t.value;
   else m.ident = IDENT[t.value] ? t.value : '';
