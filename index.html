@@ -203,6 +203,33 @@ button.tb:hover{filter:brightness(1.12)}
 .hint{font-size:11.5px;color:var(--ink-2);background:var(--surface);border-radius:9px;padding:4px 10px;box-shadow:0 0 0 1px var(--line);max-width:100%}
 .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--ink-2);pointer-events:none;font-family:var(--display);font-size:16px}
 
+/* aura (hidden mode) */
+.nen-kyoka{--c:#D93A32} .nen-hoshutsu{--c:#EE8A2E;--ci:#10140F} .nen-sosa{--c:#3E9B5A}
+.nen-tokushitsu{--c:#8E5BE0} .nen-gugenka{--c:#2F7FD0} .nen-henka{--c:#F2C624;--ci:#10140F}
+.aurabtn{align-self:center;margin-left:auto;background:var(--surface);border-color:#8E5BE0;color:var(--ink)}
+.aurabtn:not([hidden]) + .themebtn{margin-left:0}
+html.aura .stage{background-image:radial-gradient(var(--grid) 1.2px,transparent 1.3px),radial-gradient(ellipse at 50% 45%,rgba(142,91,224,.16),transparent 65%);background-size:22px 22px,100% 100%}
+html.aura .node > circle:not(.ring2){filter:drop-shadow(0 0 7px var(--g))}
+html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
+.toast{position:absolute;left:50%;top:56px;transform:translateX(-50%);z-index:6;max-width:calc(100% - 24px);background:var(--surface);border:1px solid #8E5BE0;border-radius:11px;padding:8px 14px;font-weight:700;font-size:13px;box-shadow:0 8px 28px rgba(142,91,224,.35);pointer-events:none;text-align:center}
+.stage.pulse{animation:aurapulse 1.2s ease-out}
+@keyframes aurapulse{0%{box-shadow:0 0 0 0 rgba(142,91,224,.7)}100%{box-shadow:0 0 0 22px rgba(142,91,224,0)}}
+.hex{display:block;width:100%;max-width:280px;margin:8px auto 2px;overflow:visible}
+.hex .hp{fill:none;stroke:var(--line);stroke-width:1.5}
+.hex .hv{fill:var(--g)}
+.hex .hn{fill:var(--gi);font-family:var(--mono);font-size:12px;font-weight:600;text-anchor:middle;dominant-baseline:central}
+.hex .hl{fill:var(--ink-2);font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.hex .dim{opacity:.35}
+.hex .selfring{fill:none;stroke:var(--ink);stroke-width:2}
+.hex .self .hl{fill:var(--ink)}
+.nenlist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.nenlist li{display:grid;grid-template-columns:22px 64px minmax(0,1fr);align-items:center;gap:8px}
+.nenlist li span:last-child{color:var(--ink-2)}
+.nensel{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);margin-top:8px}
+.nensel select{height:30px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 6px;min-width:0;flex:1}
+.note a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.stage.pulse{animation:none}}
+
 /* tooltip */
 .tip{position:absolute;z-index:5;left:0;top:0;width:min(300px,calc(100% - 24px));background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 28px rgba(10,20,15,.16);padding:10px 12px 9px;pointer-events:none;font-size:12.5px;line-height:1.55}
 .tip .th{display:flex;align-items:center;gap:6px;font-weight:700;flex-wrap:wrap}
@@ -268,8 +295,9 @@ button.tb:hover{filter:brightness(1.12)}
 <body>
 
 <header class="top">
-  <h1>MBTI相性マップ</h1>
-  <p>メンバーのタイプを入れると、お互いの相性をマインドマップで可視化します</p>
+  <h1 id="appTitle">MBTI相性マップ</h1>
+  <p id="appSub">メンバーのタイプを入れると、お互いの相性をマインドマップで可視化します</p>
+  <button class="btn ghost small aurabtn" id="auraBtn" type="button" hidden title="MBTIの相性診断に戻す">念 オーラモード ✕</button>
   <button class="btn ghost small themebtn" id="themeBtn" type="button" aria-label="ライトモードに切り替え">☀ ライト</button>
 </header>
 
@@ -309,7 +337,8 @@ button.tb:hover{filter:brightness(1.12)}
 
     <section class="panel" id="detail" aria-live="polite"></section>
 
-    <p class="note">相性スコアはMBTIの4つの指標（E/I・N/S・T/F・J/P）と、入力されていれば5文字目のA/Tの組み合わせから算出した目安です。性格タイプは人を決めつけるものではないので、話のきっかけとして使ってください。</p>
+    <p class="note" id="auraNote" hidden>オーラ診断は『HUNTER×HUNTER』の念の六系統（六性図の距離と、ヒソカのオーラ別性格診断）をもとにしたお遊び機能です。MBTIから系統への対応は <a href="https://note.com/nagasawa_osamu/n/n724d064cbe65" target="_blank" rel="noopener">こちらのnote記事</a> の分類を参考にしています。</p>
+    <p class="note" id="mbtiNote">相性スコアはMBTIの4つの指標（E/I・N/S・T/F・J/P）と、入力されていれば5文字目のA/Tの組み合わせから算出した目安です。性格タイプは人を決めつけるものではないので、話のきっかけとして使ってください。</p>
   </aside>
 
   <section class="stage" id="stage" aria-label="相性マップ">
@@ -320,6 +349,7 @@ button.tb:hover{filter:brightness(1.12)}
     </svg>
     <div class="empty" id="emptyMsg" hidden></div>
     <div class="tip" id="tip" role="tooltip" hidden></div>
+    <div class="toast" id="toast" role="status" hidden></div>
     <div class="maphead">
       <button class="btn ghost small" id="backBtn" type="button" hidden style="background:var(--surface)">← 全体マップ</button>
       <div class="maptitle" id="mapTitle">全体マップ</div>
@@ -367,6 +397,87 @@ const ICONS = {
 const iconSVG = t => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[t]}</svg>`;
 const GROUPS = { nt:'NT 理論派', nf:'NF 理想派', sj:'SJ 堅実派', sp:'SP 行動派' };
 const FN_NAME = { Ne:'外向直観', Ni:'内向直観', Se:'外向感覚', Si:'内向感覚', Te:'外向思考', Ti:'内向思考', Fe:'外向感情', Fi:'内向感情' };
+/* ---------- オーラ（念の六系統）: 隠しモード ---------- */
+// 六性図の並び（強化系から時計回り）。隣の系統は習得率80%、1つ飛ばしは60%、向かいは40%
+const NEN_ORDER = ['kyoka','hoshutsu','sosa','tokushitsu','gugenka','henka'];
+const NEN = {
+  kyoka:      { name:'強化系',   trait:'単純で一途',                 water:'水の量が増える' },
+  hoshutsu:   { name:'放出系',   trait:'短気で大雑把',               water:'水の色が変わる' },
+  sosa:       { name:'操作系',   trait:'理屈屋でマイペース',         water:'浮かべた葉が動く' },
+  tokushitsu: { name:'特質系',   trait:'個人主義でカリスマ性がある', water:'それ以外の変化が起きる' },
+  gugenka:    { name:'具現化系', trait:'神経質',                     water:'水に不純物が現れる' },
+  henka:      { name:'変化系',   trait:'気まぐれで嘘つき',           water:'水の味が変わる' }
+};
+// MBTI → 系統。note「MBTIと念能力」（nagasawa_osamu）の分類に従う。
+// ENFJ は記事で「放出系と操作系の中間」とされているため、最終一覧どおり放出系に寄せる
+const MBTI_NEN = {
+  ESTJ:'kyoka', ESFJ:'kyoka', ISTJ:'kyoka',
+  ENTJ:'tokushitsu', INTJ:'tokushitsu', ENFP:'tokushitsu', INFJ:'tokushitsu',
+  ESTP:'hoshutsu', ESFP:'hoshutsu', ENFJ:'hoshutsu',
+  ISTP:'sosa', INTP:'sosa',
+  ISFJ:'gugenka', ISFP:'gugenka', INFP:'gugenka',
+  ENTP:'henka'
+};
+const NEN_ICONS = {
+  kyoka:'<path d="M6.5 6v12M17.5 6v12M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+  hoshutsu:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5V6M12 18v3.5M2.5 12H6M18 12h3.5M5.3 5.3l2.5 2.5M16.2 16.2l2.5 2.5M5.3 18.7l2.5-2.5M16.2 7.8l2.5-2.5"/>',
+  sosa:'<circle cx="12" cy="13" r="1.8"/><path d="M8.6 9.6a4.8 4.8 0 0 0 0 6.8M15.4 9.6a4.8 4.8 0 0 1 0 6.8M5.7 6.7a8.9 8.9 0 0 0 0 12.6M18.3 6.7a8.9 8.9 0 0 1 0 12.6"/>',
+  tokushitsu:'<path d="M11 3c.8 4.4 2.3 5.9 6.7 6.7-4.4.8-5.9 2.3-6.7 6.7-.8-4.4-2.3-5.9-6.7-6.7C8.7 8.9 10.2 7.4 11 3z"/><path d="M18.5 14.5c.3 1.7.9 2.3 2.6 2.6-1.7.3-2.3.9-2.6 2.6-.3-1.7-.9-2.3-2.6-2.6 1.7-.3 2.3-.9 2.6-2.6z"/>',
+  gugenka:'<rect x="2.5" y="8.5" width="10.5" height="7" rx="3.5" transform="rotate(-30 7.75 12)"/><rect x="11" y="8.5" width="10.5" height="7" rx="3.5" transform="rotate(-30 16.25 12)"/>',
+  henka:'<path d="M13.5 2.5L5 13.5h6.5l-1 8 8.5-11h-6.5z"/>'
+};
+const nenDist = (a, b) => { const d = Math.abs(NEN_ORDER.indexOf(a) - NEN_ORDER.indexOf(b)); return Math.min(d, 6 - d); };
+// 系統の組み合わせごとの [かみ合うところ, ぶつかりやすいところ, うまくいくコツ]（キーは六性図の順）
+const NEN_PAIR = {
+  'kyoka|kyoka':           ['目標が同じなら、迷わず一直線に突き進める', 'どちらも頑固で、ぶつかると引かない', '最初に「何を目指すか」だけはすり合わせておきましょう。'],
+  'kyoka|hoshutsu':        ['まっすぐさと勢いがかみ合う、行動派のコンビ', '勢い任せで、細かい詰めが抜けがち', 'どちらか一人は、動く前に段取りを確認する役に。'],
+  'kyoka|sosa':            ['操作系の理屈が、強化系の突進に道筋をつける', '単純な強化系と理屈っぽい操作系で、話が噛み合わない', '操作系は結論から、強化系は理由を一度聞いてから動きましょう。'],
+  'kyoka|tokushitsu':      ['自分にないものを持つ相手として、強く惹かれ合う', '一途な強化系には、特質系の独自の考えが理解しにくい', '違いを直そうとせず、面白がるくらいがちょうどいい。'],
+  'kyoka|gugenka':         ['強化系の一途さを、具現化系が丁寧に形にして支える', '強化系の雑さが、神経質な具現化系のストレスになる', '「どこまで丁寧にやるか」の基準を先に合わせましょう。'],
+  'kyoka|henka':           ['変化系がうまく乗せ、強化系の一途さが変化系の軸になる', '強化系が、変化系の気まぐれや冗談に振り回される', '変化系は、冗談と本気をはっきり分けて伝えて。'],
+  'hoshutsu|hoshutsu':     ['ノリと勢いで、一気に物事を動かせる', '短気同士で、火花が散りやすい', '熱くなったら、どちらかが一度間を置く合図を決めておきましょう。'],
+  'hoshutsu|sosa':         ['放出系の勢いを、操作系が理屈で方向づける', '操作系のマイペースに、短気な放出系がじれる', '期限と進め方を先に決めておくと、どちらも気持ちよく動けます。'],
+  'hoshutsu|tokushitsu':   ['特質系のカリスマを、放出系の行動力が外へ広める', '放出系の大雑把さと、特質系の独自ルールが衝突する', '任せる範囲と、こだわる範囲をはっきり分けましょう。'],
+  'hoshutsu|gugenka':      ['大胆さと緻密さで、役割をきれいに分けられる', '大雑把と神経質が、真っ向からぶつかる', '担当を明確に分けて、お互いの領分には口を出しすぎないこと。'],
+  'hoshutsu|henka':        ['ノリが合って、場を一番盛り上げるコンビ', '気まぐれと短気で、ケンカが絶えない', '冗談の「ここまではOK」の線引きを共有しておきましょう。'],
+  'sosa|sosa':             ['理屈で話が通じ、お互いのペースを尊重できる', '我が道を行くので、連携が後回しになりがち', '進み具合を共有するタイミングだけ決めておきましょう。'],
+  'sosa|tokushitsu':       ['理屈と独自の発想で、仕組みごと作り変えられる', 'どちらも自分流で、歩み寄りに時間がかかる', '一度は相手のやり方を試してみると、突破口が見えます。'],
+  'sosa|gugenka':          ['どちらも緻密で、計画的に物事を進められる', '理屈と神経質が重なり、議論が細かくなりすぎる', '決め手になる基準を1つに絞ってから話し合いましょう。'],
+  'sosa|henka':            ['理屈と柔軟さで、どんな状況にも対応できる', '理屈屋の操作系には、変化系の気まぐれが「嘘」に見える', '約束ごとは言葉だけでなく、記録に残しておきましょう。'],
+  'tokushitsu|tokushitsu': ['唯一無二の発想どうしが、化学反応を起こす', 'どちらも主役で、主導権がぶつかる', 'それぞれが仕切る領域を分けておきましょう。'],
+  'tokushitsu|gugenka':    ['特質系のビジョンを、具現化系が細部まで形にする', '特質系の突飛さに、神経質な具現化系が振り回される', '方針を変えるときは、早めに理由と一緒に伝えて。'],
+  'tokushitsu|henka':      ['予想外どうしで、発想の飛距離が大きい', 'どちらも読めず、周りが置いていかれる', '途中経過をこまめに見せて、周りも巻き込みましょう。'],
+  'gugenka|gugenka':       ['細部までこだわり抜いた仕事ができる', '神経質さが重なり、気疲れしやすい', '「完璧より完了」を合言葉にしましょう。'],
+  'gugenka|henka':         ['変化系の柔らかさが、具現化系の緊張をほぐす', '気まぐれな変更が、神経質な具現化系を刺激する', '予定を変えるときは、必ず理由を添えて。'],
+  'henka|henka':           ['気まぐれ同士、自由で飽きない関係', '本音が見えず、疑心暗鬼になりがち', '大事なことだけは、はっきり言葉にして約束しましょう。']
+};
+const NEN_DIST = [
+  { name:'同じ系統', lab:'同', s:'同じ系統。オーラの性質がそっくり',       text:'六性図で同じ位置。オーラの性質が同じなので、考え方や動き方を説明しなくても分かり合えます。' },
+  { name:'隣の系統', lab:'隣', s:'六性図で隣どうし（習得率80%）',           text:'六性図で隣り合う系統。お互いの系統を80%の精度で扱えるほど近く、無理なく力を合わせられます。' },
+  { name:'1つ飛ばし', lab:'飛', s:'六性図で1つ飛ばし（習得率60%）',        text:'六性図で1つ飛ばしの系統。相手の系統は60%しか扱えない距離なので、やり方の違いを知るほど補い合えます。' },
+  { name:'対極', lab:'対', s:'六性図で正反対（習得率40%）',                text:'六性図で向かい合う系統。相手の得意分野は40%しか扱えないほど遠く、価値観の違いが出やすい組み合わせです。' }
+];
+const NEN_SCORE = [92, 84, 66, 50];
+
+function auraCompat(x, y) {
+  const [p, q] = NEN_ORDER.indexOf(x) <= NEN_ORDER.indexOf(y) ? [x, y] : [y, x];
+  const d = nenDist(x, y);
+  const [good, bad, tip] = NEN_PAIR[p + '|' + q];
+  const dist = NEN_DIST[d];
+  const score = NEN_SCORE[d];
+  let distText = dist.text;
+  if ((x === 'tokushitsu') !== (y === 'tokushitsu')) distText += 'ただし特質系は、ほかの系統からはふつう習得できない特別な系統です。';
+  const factors = [
+    { axis:'六性図の距離', lab:dist.lab, d:score - 50, good:d <= 1, s:dist.s, text:distText },
+    { axis:'かみ合うところ', lab:'◎', good:true, s:good, text:`${good}。` },
+    { axis:'ぶつかりやすいところ', lab:'△', good:false, s:bad, text:`${bad}。` }
+  ];
+  const relation = { name:dist.name, text: p === q
+    ? `どちらも${NEN[p].name}（${NEN[p].trait}）。`
+    : `${NEN[p].name}（${NEN[p].trait}）と${NEN[q].name}（${NEN[q].trait}）の組み合わせ。` };
+  return { score, tier:tierOf(score), factors, relation, shared:[], tips:[tip], aura:true };
+}
+
 const TIERS = [
   { key:'t1', name:'最高',       min:88 },
   { key:'t2', name:'良好',       min:75 },
@@ -408,6 +519,11 @@ const compatCache = new Map();
 function compat(a, b) {
   const key = a < b ? a + b : b + a;
   if (compatCache.has(key)) return compatCache.get(key);
+  if (a.startsWith('nen:')) {
+    const res = auraCompat(a.slice(4), b.slice(4));
+    compatCache.set(key, res);
+    return res;
+  }
   let s = 50;
   const f = [];
   // E/I
@@ -482,12 +598,21 @@ const MAX_MEMBERS = 20;
 
 let members = [];
 let nextId = 1;
-const state = { mode:'overview', focusId:null, pair:null, hover:null, hoverPair:null, hidden:new Set(), isSample:false };
+const state = { aura:false, mode:'overview', focusId:null, pair:null, hover:null, hoverPair:null, hidden:new Set(), isSample:false };
 let pos = {}, overviewPos = {}, viewBox = { x:-300, y:-220, w:600, h:440 };
 let focusRadius = null;
 let anim = 0;
 
 const byId = id => members.find(m => m.id === id);
+const nenOf = m => NEN[m.nen] ? m.nen : MBTI_NEN[m.type];
+// 相性計算のキー。オーラモードでは系統、通常はタイプ（例: INFJ-A）
+const keyOf = m => state.aura ? 'nen:' + nenOf(m) : codeOf(m);
+// 見た目（色・アイコン・ラベル）もモードに合わせて切り替える
+const skinOf = m => state.aura ? `tyc nen-${nenOf(m)}` : `tyc ty-${m.type}`;
+const iconOf = m => state.aura ? NEN_ICONS[nenOf(m)] : ICONS[m.type];
+const iconFor = m => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${iconOf(m)}</svg>`;
+const labelOf = m => state.aura ? NEN[nenOf(m)].name : codeOf(m);
+const titleOf = m => state.aura ? `${NEN[nenOf(m)].name}（${codeOf(m)} ${DESC[m.type]}）` : `${codeOf(m)} ${DESC[m.type]}`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
 function save() {
@@ -498,7 +623,7 @@ function load() {
     const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
     if (!d || !Array.isArray(d.members)) return false;
     members = d.members.filter(m => m && TYPES.includes(m.type) && Number.isInteger(m.id))
-      .map(m => ({ id:m.id, name:String(m.name || '').slice(0, 16) || '名無し', type:m.type, ident:IDENT[m.ident] ? m.ident : '' }));
+      .map(m => ({ id:m.id, name:String(m.name || '').slice(0, 16) || '名無し', type:m.type, ident:IDENT[m.ident] ? m.ident : '', nen:NEN[m.nen] ? m.nen : '' }));
     nextId = Math.max(d.nextId || 1, ...members.map(m => m.id + 1), 1);
     state.isSample = !!d.isSample;
     return true;
@@ -516,7 +641,7 @@ function allPairs() {
   for (let i = 0; i < members.length; i++)
     for (let j = i + 1; j < members.length; j++) {
       const a = members[i], b = members[j];
-      out.push({ a, b, c:compat(codeOf(a), codeOf(b)) });
+      out.push({ a, b, c:compat(keyOf(a), keyOf(b)) });
     }
   return out;
 }
@@ -528,7 +653,7 @@ function forceLayout(seed) {
     x: Math.cos(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 37) % 11) - 5,
     y: Math.sin(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 53) % 13) - 6
   });
-  const S = members.map(a => members.map(b => compat(codeOf(a), codeOf(b)).score));
+  const S = members.map(a => members.map(b => compat(keyOf(a), keyOf(b)).score));
   const IT = 600;
   for (let it = 0; it < IT; it++) {
     const alpha = 1 - it / IT;
@@ -563,7 +688,7 @@ function fitVB(p) {
 function focusLayout(cid) {
   const c = byId(cid);
   const others = members.filter(m => m.id !== cid)
-    .map(m => ({ m, s:compat(codeOf(c), codeOf(m)).score }))
+    .map(m => ({ m, s:compat(keyOf(c), keyOf(m)).score }))
     .sort((p, q) => q.s - p.s || p.m.id - q.m.id);
   const n = others.length;
   const rmin = Math.max(135, n * 74 / (2 * Math.PI));
@@ -623,7 +748,7 @@ function rebuildScene() {
       lbl.textContent = `${t.min}+ ${t.name}`;
     }
     members.filter(m => m.id !== c.id).forEach((m, i) => {
-      const cc = compat(codeOf(c), codeOf(m));
+      const cc = compat(keyOf(c), keyOf(m));
       if (state.hidden.has(cc.tier.key)) return;
       const g = el('g', { class:`edge branch ${cc.tier.key}`, 'data-a':c.id, 'data-b':m.id }, gEdges);
       const w = 2 + (cc.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5;
@@ -637,16 +762,16 @@ function rebuildScene() {
     const isCenter = state.mode === 'focus' && m.id === state.focusId;
     const r = state.mode === 'overview' ? 30 : (isCenter ? 42 : 28);
     const g = el('g', {
-      class:`node tyc ty-${m.type}${isCenter ? ' center' : ''}`, 'data-id':m.id,
-      tabindex:0, role:'button', 'aria-label':`${m.name}（${codeOf(m)}）`
+      class:`node ${skinOf(m)}${isCenter ? ' center' : ''}`, 'data-id':m.id,
+      tabindex:0, role:'button', 'aria-label':`${m.name}（${labelOf(m)}）`
     }, gNodes);
     el('circle', { class:'ring2', r:r + 6 }, g);
     el('circle', { r }, g);
     const size = isCenter ? 36 : 28;
     const ic = el('g', { class:'nicon', transform:`translate(${-size / 2},${-size / 2}) scale(${size / 24})` }, g);
-    ic.innerHTML = ICONS[m.type];
+    ic.innerHTML = iconOf(m);
     const nm = el('text', { class:'nname', y:r + 18 }, g); nm.textContent = m.name;
-    const code = el('text', { class:'ncode', y:r + 32 }, g); code.textContent = codeOf(m);
+    const code = el('text', { class:'ncode', y:r + 32 }, g); code.textContent = labelOf(m);
     sceneNodes[m.id] = g;
   }
   applyHighlight();
@@ -732,7 +857,7 @@ const emptyMsg = document.getElementById('emptyMsg');
 function renderChrome() {
   const focus = state.mode === 'focus';
   const c = focus ? byId(state.focusId) : null;
-  mapTitle.textContent = focus ? `${c.name}（${codeOf(c)}）から見た相性` : '全体マップ';
+  mapTitle.textContent = focus ? `${c.name}（${labelOf(c)}）から見た相性` : (state.aura ? '全体マップ（オーラ）' : '全体マップ');
   backBtn.hidden = !focus;
   relayoutBtn.hidden = focus || members.length < 3;
   hint.textContent = focus
@@ -740,7 +865,7 @@ function renderChrome() {
     : '線や丸にマウスを乗せると相性の中身 ／ 丸をクリックでその人中心 ／ ドラッグで移動';
 
   const counts = { t1:0, t2:0, t3:0, t4:0 };
-  if (focus) members.forEach(m => { if (m.id !== c.id) counts[compat(codeOf(c), codeOf(m)).tier.key]++; });
+  if (focus) members.forEach(m => { if (m.id !== c.id) counts[compat(keyOf(c), keyOf(m)).tier.key]++; });
   else allPairs().forEach(p => counts[p.c.tier.key]++);
   legend.innerHTML = TIERS.map(t =>
     `<button type="button" class="chip ${t.key}" data-tier="${t.key}" aria-pressed="${!state.hidden.has(t.key)}"><span class="sw"></span>${t.name}<span class="c">${counts[t.key]}</span></button>`
@@ -774,7 +899,7 @@ function renderMembers() {
   document.getElementById('memFoot').hidden = !members.length;
   memberList.innerHTML = members.map(m => `
     <li class="mem">
-      <button type="button" class="tb tyc ty-${m.type}" data-focus="${m.id}" title="${esc(m.name)}を中心に表示（${m.type} ${DESC[m.type]}）" aria-label="${esc(m.name)}を中心に表示">${iconSVG(m.type)}</button>
+      <button type="button" class="tb ${skinOf(m)}" data-focus="${m.id}" title="${esc(m.name)}を中心に表示（${titleOf(m)}）" aria-label="${esc(m.name)}を中心に表示">${iconFor(m)}</button>
       <input class="mname" id="name-${m.id}" data-name="${m.id}" value="${esc(m.name)}" maxlength="16" autocomplete="off" aria-label="${esc(m.name)}の名前" title="クリックして名前を書き換え">
       <select id="type-${m.id}" data-type="${m.id}" aria-label="${esc(m.name)}のタイプ">${typeOptions(m.type)}</select>
       <select id="ident-${m.id}" data-ident="${m.id}" aria-label="${esc(m.name)}の5文字目（A/T）" title="A＝自己主張型 / T＝慎重型">
@@ -784,13 +909,38 @@ function renderMembers() {
     </li>`).join('');
 }
 
-const personChip = m => `<span class="tb tyc ty-${m.type}" role="img" title="${codeOf(m)} ${DESC[m.type]}" aria-label="${codeOf(m)} ${DESC[m.type]}">${iconSVG(m.type)}</span><span class="t">${esc(m.name)}</span>${m.ident ? `<span class="idn">-${m.ident}</span>` : ''}`;
+const personChip = m => `<span class="tb ${skinOf(m)}" role="img" title="${titleOf(m)}" aria-label="${titleOf(m)}">${iconFor(m)}</span><span class="t">${esc(m.name)}</span>${m.ident ? `<span class="idn">-${m.ident}</span>` : ''}`;
 
 function pairRow(a, b, c) {
   return `<li><button type="button" class="rowbtn" data-pair="${a.id},${b.id}">
     <span class="duo"><span class="who2">${personChip(a)}</span><span class="who2">${personChip(b)}</span></span>
     <span class="bar ${c.tier.key}"><i style="width:${c.score}%"></i></span>
     <span class="num">${c.score}</span></button></li>`;
+}
+
+// 六性図。mode 'rate' は self から見た習得率、'count' は系統ごとの人数
+function hexSVG(mode, self) {
+  const cx = 110, cy = 96, R = 64;
+  const pt = (i, r) => [cx + r * Math.cos((-90 + i * 60) * Math.PI / 180), cy + r * Math.sin((-90 + i * 60) * Math.PI / 180)];
+  const poly = NEN_ORDER.map((k, i) => pt(i, R).map(v => v.toFixed(1)).join(',')).join(' ');
+  const counts = {};
+  if (mode === 'count') members.forEach(m => { const k = nenOf(m); counts[k] = (counts[k] || 0) + 1; });
+  const nodes = NEN_ORDER.map((k, i) => {
+    const [x, y] = pt(i, R), [lx, ly] = pt(i, R + 33);
+    let val, dim = false, isSelf = false;
+    if (mode === 'rate') {
+      isSelf = k === self;
+      if (k === 'tokushitsu' && self !== 'tokushitsu') { val = '—'; dim = true; }
+      else val = [100, 80, 60, 40][nenDist(self, k)] + '%';
+    } else { val = counts[k] || 0; dim = !val; }
+    return `<g class="tyc nen-${k}${dim ? ' dim' : ''}${isSelf ? ' self' : ''}">
+      ${isSelf ? `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="25" class="selfring"/>` : ''}
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="20" class="hv"/>
+      <text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="hn">${val}</text>
+      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" class="hl">${NEN[k].name}</text></g>`;
+  }).join('');
+  const label = mode === 'rate' ? `${NEN[self].name}から見た六性図の習得率` : '六性図での系統ごとの人数';
+  return `<svg class="hex" viewBox="0 0 220 196" role="img" aria-label="${label}"><polygon points="${poly}" class="hp"/>${nodes}</svg>`;
 }
 
 function renderTeam() {
@@ -818,7 +968,8 @@ function renderTeam() {
     <h3>相性ベスト</h3>
     <ul class="rank">${best.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>
     ${worst.length ? `<h3>歩み寄りが大事な組み合わせ</h3><ul class="rank">${worst.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>` : ''}
-    <h3>指標ごとの分布</h3>
+    ${state.aura ? `<h3>六性図での分布</h3>${hexSVG('count')}
+    <ul class="nenlist">${NEN_ORDER.filter(k => members.some(m => nenOf(m) === k)).map(k => `<li><span class="tb tyc nen-${k}">${`<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${NEN_ICONS[k]}</svg>`}</span><b>${NEN[k].name}</b><span>${members.filter(m => nenOf(m) === k).map(m => esc(m.name)).join('、')}</span></li>`).join('')}</ul>` : `<h3>指標ごとの分布</h3>
     <div class="dist">${axes.map(([l, r, i]) => {
       const c = cnt(i);
       return `<div class="drow"><span>${l} ${c}</span><span class="split" role="img" aria-label="${l} ${c}人、${r} ${n - c}人"><i style="width:${c / n * 100}%"></i><i style="width:${(n - c) / n * 100}%"></i></span><span class="r">${n - c} ${r}</span></div>`;
@@ -828,32 +979,53 @@ function renderTeam() {
       return `<div class="drow"><span>A ${a}</span><span class="split" role="img" aria-label="A ${a}人、T ${t}人、未入力 ${u}人"><i style="width:${a / n * 100}%"></i><i style="width:${t / n * 100}%"></i></span><span class="r">${t} T</span></div>`
         + (u ? `<div class="identhint" style="margin-top:0">A/T未入力: ${u}人</div>` : '');
     })()}</div>
-    <div class="groups">${Object.keys(groups).map(g => `<span><span class="dot g-${g}"></span>${GROUPS[g]} ${groups[g]}</span>`).join('')}</div>`;
+    <div class="groups">${Object.keys(groups).map(g => `<span><span class="dot g-${g}"></span>${GROUPS[g]} ${groups[g]}</span>`).join('')}</div>`}`;
 }
 
 function renderMember(id) {
   const m = byId(id);
   const st = stackOf(m.type);
-  const ranks = members.filter(o => o.id !== id).map(o => ({ o, c:compat(codeOf(m), codeOf(o)) }))
+  const ranks = members.filter(o => o.id !== id).map(o => ({ o, c:compat(keyOf(m), keyOf(o)) }))
     .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
   const labels = ['主機能','補助','第三','劣等'];
+  const rankList = `<ul class="rank">${ranks.map(({ o, c }) => `<li><button type="button" class="rowbtn" data-pair="${m.id},${o.id}">
+      <span class="who2">${personChip(o)}</span>
+      <span class="bar ${c.tier.key}"><i style="width:${c.score}%"></i></span>
+      <span class="num">${c.score}</span></button></li>`).join('') || '<li class="muted">ほかのメンバーを追加してください</li>'}</ul>`;
+  if (state.aura) {
+    const k = nenOf(m), auto = MBTI_NEN[m.type];
+    detail.innerHTML = `
+    <button type="button" class="backlink" data-act="overview">← チーム全体へ</button>
+    <div class="who ${skinOf(m)}">
+      <span class="badge-type" title="${NEN[k].name}">${iconFor(m)}</span>
+      <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="code">${NEN[k].name}</span> ${NEN[k].trait}</div></div>
+    </div>
+    ${hexSVG('rate', k)}
+    <p class="muted">水見式では「${NEN[k].water}」タイプ。${m.nen ? '系統は手動で設定しています。' : `${codeOf(m)}（${DESC[m.type]}）から判定しました。`}</p>
+    <label class="nensel" for="nen-${m.id}">系統
+      <select id="nen-${m.id}" data-nen="${m.id}">
+        <option value=""${m.nen ? '' : ' selected'}>MBTIから自動（${NEN[auto].name}）</option>
+        ${NEN_ORDER.map(n => `<option value="${n}"${m.nen === n ? ' selected' : ''}>${NEN[n].name}</option>`).join('')}
+      </select>
+    </label>
+    <h3>相性ランキング</h3>
+    ${rankList}`;
+    return;
+  }
   detail.innerHTML = `
     <button type="button" class="backlink" data-act="overview">← チーム全体へ</button>
     <div class="who tyc ty-${m.type}">
-      <span class="badge-type" title="${m.type} ${DESC[m.type]}">${iconSVG(m.type)}</span>
+      <span class="badge-type" title="${m.type} ${DESC[m.type]}">${iconFor(m)}</span>
       <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="code">${codeOf(m)}</span> ${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}${m.ident ? ` · ${IDENT[m.ident]}（${m.ident}）` : ''}</div></div>
     </div>
     <div class="fns">${st.map((f, i) => `<div class="fn"><small>${labels[i]}</small><b>${f}</b><span>${FN_NAME[f]}</span></div>`).join('')}</div>
     <h3>相性ランキング</h3>
-    <ul class="rank">${ranks.map(({ o, c }) => `<li><button type="button" class="rowbtn" data-pair="${m.id},${o.id}">
-      <span class="who2">${personChip(o)}</span>
-      <span class="bar ${c.tier.key}"><i style="width:${c.score}%"></i></span>
-      <span class="num">${c.score}</span></button></li>`).join('') || '<li class="muted">ほかのメンバーを追加してください</li>'}</ul>`;
+    ${rankList}`;
 }
 
 function renderPair(aId, bId) {
   const a = byId(aId), b = byId(bId);
-  const c = compat(codeOf(a), codeOf(b));
+  const c = compat(keyOf(a), keyOf(b));
   const back = state.mode === 'focus' ? `${esc(byId(state.focusId).name)}の相性一覧へ` : 'チーム全体へ';
   detail.innerHTML = `
     <button type="button" class="backlink" data-act="unpair">← ${back}</button>
@@ -865,11 +1037,11 @@ function renderPair(aId, bId) {
       <div class="meta"><span class="tier ${c.tier.key}">${c.tier.name}</span>${c.relation ? `<span><span class="rel">${c.relation.name}</span></span>` : ''}</div>
     </div>
     ${c.relation ? `<p class="reltext">${c.relation.text}</p>` : ''}
-    <h3>指標ごとに見ると</h3>
+    <h3>${c.aura ? '六性図と性格で見ると' : '指標ごとに見ると'}</h3>
     <ul class="axes">${c.factors.map(f => `<li class="axis">
       <span class="an">${f.axis}</span>
-      <span class="ab">${codeOf(a)[f.i]} · ${codeOf(b)[f.i]}</span>
-      <span class="dv ${f.d > 0 ? 'plus' : f.d < 0 ? 'minus' : ''}">${f.d > 0 ? '+' : ''}${f.d}</span>
+      <span class="ab">${f.lab || `${codeOf(a)[f.i]} · ${codeOf(b)[f.i]}`}</span>
+      <span class="dv ${f.d > 0 ? 'plus' : f.d < 0 ? 'minus' : ''}">${f.d == null ? '' : `${f.d > 0 ? '+' : ''}${f.d}`}</span>
       <p>${f.text}</p></li>`).join('')}</ul>
     ${c.shared.length ? `<h3>共通の得意な心理機能</h3><p class="muted">${c.shared.map(f => `<b class="code" style="color:var(--ink)">${f}</b> ${FN_NAME[f]}`).join('、')}。考え方の「クセ」が似ているので、説明なしで通じる場面が多いはず。</p>` : ''}
     <h3>うまくいくコツ</h3>
@@ -1062,9 +1234,9 @@ const tip = document.getElementById('tip');
 let tipKey = null;
 
 function pairTipHTML(a, b) {
-  const c = compat(codeOf(a), codeOf(b));
+  const c = compat(keyOf(a), keyOf(b));
   const good = c.factors.filter(f => f.good), bad = c.factors.filter(f => !f.good);
-  const li = f => `<li><span class="ab">${codeOf(a)[f.i]}·${codeOf(b)[f.i]}</span><span>${f.s}</span></li>`;
+  const li = f => `<li><span class="ab">${f.lab || `${codeOf(a)[f.i]}·${codeOf(b)[f.i]}`}</span><span>${f.s}</span></li>`;
   return `
     <div class="th">${personChip(a)}<span class="code">×</span>${personChip(b)}</div>
     <div class="ts"><b>${c.score}</b><span class="tier ${c.tier.key}">${c.tier.name}</span>${c.relation ? `<span class="rel">${c.relation.name}</span>` : ''}</div>
@@ -1078,7 +1250,7 @@ function pairTipHTML(a, b) {
 }
 
 function memberTipHTML(m) {
-  const r = members.filter(o => o.id !== m.id).map(o => ({ o, c:compat(codeOf(m), codeOf(o)) }))
+  const r = members.filter(o => o.id !== m.id).map(o => ({ o, c:compat(keyOf(m), keyOf(o)) }))
     .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
   const row = ({ o, c }) => `<li class="mp">${personChip(o)}<span class="num">${c.score}</span><span class="tier ${c.tier.key}">${c.tier.name}</span></li>`;
   const best = r.filter(x => x.c.score === r[0].c.score).slice(0, 3);
@@ -1086,7 +1258,9 @@ function memberTipHTML(m) {
   const worst = r.length > 1 && last.c.score < r[0].c.score ? r.filter(x => x.c.score === last.c.score).slice(0, 3) : [];
   return `
     <div class="th">${personChip(m)}</div>
-    <div class="sub">${DESC[m.type]}${m.ident ? `（${IDENT[m.ident]}）` : ''} · ${GROUPS[groupOf(m.type)]} · 主機能 ${stackOf(m.type)[0]}（${FN_NAME[stackOf(m.type)[0]]}）</div>
+    <div class="sub">${state.aura
+      ? `${NEN[nenOf(m)].name} · ${NEN[nenOf(m)].trait} · ${codeOf(m)}`
+      : `${DESC[m.type]}${m.ident ? `（${IDENT[m.ident]}）` : ''} · ${GROUPS[groupOf(m.type)]} · 主機能 ${stackOf(m.type)[0]}（${FN_NAME[stackOf(m.type)[0]]}）`}</div>
     <h4 class="good">いちばん相性がいい</h4><ul>${best.map(row).join('')}</ul>
     ${worst.length ? `<h4 class="bad">歩み寄りが大事</h4><ul>${worst.map(row).join('')}</ul>` : ''}
     <div class="tf">クリックでこの人を中心にしたマップへ ／ 線に乗せるとペアの詳細</div>`;
@@ -1200,8 +1374,66 @@ themeBtn.addEventListener('click', () => {
 });
 renderThemeBtn();
 
+/* ---------- hidden: aura mode ---------- */
+// 起動方法: 入力欄の外で「n」「e」「n」とキーを押す／タイトルを素早く5回タップ／URL末尾に #aura
+const AURA_KEY = 'mbti-compat-map-aura';
+const auraBtn = document.getElementById('auraBtn');
+const toast = document.getElementById('toast');
+let toastTimer = 0;
+function showToast(msg) {
+  toast.textContent = msg; toast.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.hidden = true; }, 2600);
+}
+function renderAuraChrome() {
+  const on = state.aura;
+  document.documentElement.classList.toggle('aura', on);
+  document.getElementById('appTitle').textContent = on ? 'オーラ相性マップ' : 'MBTI相性マップ';
+  document.getElementById('appSub').textContent = on
+    ? 'メンバーのオーラ系統（念の六性図）から、お互いの相性を占います'
+    : 'メンバーのタイプを入れると、お互いの相性をマインドマップで可視化します';
+  document.title = on ? 'オーラ相性マップ' : 'MBTI相性マップ';
+  auraBtn.hidden = !on;
+  document.getElementById('auraNote').hidden = !on;
+  document.getElementById('mbtiNote').hidden = on;
+}
+function setAura(on, announce) {
+  if (state.aura === on) return;
+  state.aura = on;
+  try { localStorage.setItem(AURA_KEY, on ? '1' : ''); } catch (e) {}
+  renderAuraChrome();
+  overviewPos = forceLayout(overviewPos);
+  refresh();
+  if (announce) {
+    showToast(on ? '念能力、発動。オーラ別の相性診断に切り替えました' : 'MBTIの相性診断に戻しました');
+    stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse');
+  }
+}
+auraBtn.addEventListener('click', () => setAura(false, true));
+let keySeq = '';
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  if (e.key.length !== 1) return;
+  keySeq = (keySeq + e.key.toLowerCase()).slice(-3);
+  if (keySeq === 'nen') { keySeq = ''; setAura(!state.aura, true); }
+});
+let taps = [];
+document.getElementById('appTitle').addEventListener('click', () => {
+  const now = Date.now();
+  taps = taps.filter(t => now - t < 2500).concat(now);
+  if (taps.length >= 5) { taps = []; setAura(!state.aura, true); }
+});
+detail.addEventListener('change', e => {
+  const t = e.target; if (!t.dataset.nen) return;
+  const m = byId(+t.dataset.nen); if (!m) return;
+  m.nen = NEN[t.value] ? t.value : '';
+  overviewPos = forceLayout(overviewPos);
+  refresh();
+});
+
 /* ---------- boot ---------- */
 if (!load() || (!members.length && !state.isSample)) { if (!members.length) loadSample(); }
+try { state.aura = location.hash === '#aura' || localStorage.getItem(AURA_KEY) === '1'; } catch (e) { state.aura = location.hash === '#aura'; }
+renderAuraChrome();
 refresh(true);
 })();
 </script>
