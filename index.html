@@ -60,7 +60,7 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .top{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding-block:14px 12px}
-.top h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0;letter-spacing:.02em}
+.top h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0;letter-spacing:.02em;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .top p{margin:0;color:var(--ink-2);font-size:13px}
 .themebtn{margin-left:auto;align-self:center;background:var(--surface)}
 
@@ -1122,6 +1122,13 @@ function say(msg, err) { formMsg.textContent = msg; formMsg.classList.toggle('er
 document.getElementById('addForm').addEventListener('submit', e => {
   e.preventDefault();
   const nameEl = document.getElementById('nameInput');
+  // 裏コマンド: 名前欄に「nen」「ねん」「念」と入れて追加を押すとオーラモードを切り替える（スマホ向け）
+  if (/^(nen|ねん|念)$/i.test(nameEl.value.trim())) {
+    nameEl.value = ''; nameEl.blur();
+    setAura(!state.aura, true);
+    say(state.aura ? '……念が発動した。' : 'MBTIの相性診断に戻しました');
+    return;
+  }
   const type = typeInput.value;
   if (!type) { say('タイプを選んでください', true); typeInput.focus(); return; }
   if (members.length >= MAX_MEMBERS) { say(`登録できるのは${MAX_MEMBERS}人までです`, true); return; }
@@ -1390,7 +1397,7 @@ themeBtn.addEventListener('click', () => {
 renderThemeBtn();
 
 /* ---------- hidden: aura mode ---------- */
-// 起動方法: 入力欄の外で「n」「e」「n」とキーを押す／タイトルを素早く5回タップ／URL末尾に #aura
+// 起動方法: 入力欄の外で「n」「e」「n」とキーを押す／名前欄に「nen」「念」と入れて追加／タイトルを1.5秒長押し・素早く5回タップ／URL末尾に #aura
 const AURA_KEY = 'mbti-compat-map-aura';
 const auraBtn = document.getElementById('auraBtn');
 const toast = document.getElementById('toast');
@@ -1421,6 +1428,10 @@ function setAura(on, announce) {
   if (announce) {
     showToast(on ? '念能力、発動。オーラ別の相性診断に切り替えました' : 'MBTIの相性診断に戻しました');
     stage.classList.remove('pulse'); void stage.offsetWidth; stage.classList.add('pulse');
+    if (matchMedia('(max-width:880px)').matches) {
+      const r = stage.getBoundingClientRect();
+      if (r.top < 0 || r.bottom > innerHeight) stage.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start' });
+    }
   }
 }
 auraBtn.addEventListener('click', () => setAura(false, true));
@@ -1432,11 +1443,22 @@ document.addEventListener('keydown', e => {
   if (keySeq === 'nen') { keySeq = ''; setAura(!state.aura, true); }
 });
 let taps = [];
-document.getElementById('appTitle').addEventListener('click', () => {
+const appTitle = document.getElementById('appTitle');
+let pressTimer = 0, pressFired = false;
+appTitle.addEventListener('click', () => {
+  if (pressFired) { pressFired = false; return; }
   const now = Date.now();
   taps = taps.filter(t => now - t < 2500).concat(now);
   if (taps.length >= 5) { taps = []; setAura(!state.aura, true); }
 });
+// タイトルを1.5秒長押しでも切り替え（スマホ向け。オーラを「練る」イメージ）
+const cancelPress = () => clearTimeout(pressTimer);
+appTitle.addEventListener('pointerdown', () => {
+  cancelPress();
+  pressTimer = setTimeout(() => { pressFired = true; taps = []; setAura(!state.aura, true); }, 1500);
+});
+['pointerup', 'pointerleave', 'pointercancel'].forEach(t => appTitle.addEventListener(t, cancelPress));
+appTitle.addEventListener('contextmenu', e => e.preventDefault());
 detail.addEventListener('change', e => {
   const t = e.target; if (!t.dataset.nen) return;
   const m = byId(+t.dataset.nen); if (!m) return;
