@@ -71,7 +71,8 @@ button{cursor:pointer}
 .panel h3{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ink-2);margin:16px 0 8px}
 
 /* add form */
-.addrow{display:grid;grid-template-columns:minmax(0,1fr) 104px auto;gap:6px}
+.addrow{display:grid;grid-template-columns:minmax(0,1fr) 92px 62px auto;gap:6px}
+.identhint{font-size:11.5px;color:var(--ink-2);margin-top:6px}
 .field{height:36px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:0 10px;min-width:0}
 select.field{padding:0 6px}
 .btn{height:36px;border-radius:9px;border:1px solid transparent;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:0 14px;white-space:nowrap}
@@ -88,7 +89,7 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 .tag{font-size:11px;font-weight:700;letter-spacing:.04em;border:1px solid var(--line);border-radius:99px;padding:0 8px;color:var(--ink-2)}
 
 .members{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
-.mem{display:grid;grid-template-columns:12px minmax(0,1fr) 92px 28px;align-items:center;gap:8px;padding-block:5px;border-top:1px solid var(--line)}
+.mem{display:grid;grid-template-columns:12px minmax(0,1fr) 78px 50px 28px;align-items:center;gap:8px;padding-block:5px;border-top:1px solid var(--line)}
 .mem:first-child{border-top:0}
 .dot{width:12px;height:12px;border-radius:50%;background:var(--g)}
 .g-nt{--g:var(--nt);--gi:var(--on-nt)} .g-nf{--g:var(--nf);--gi:var(--on-nf)}
@@ -224,6 +225,8 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 .node circle{fill:var(--g);stroke:var(--surface);stroke-width:3;transition:stroke .15s}
 .node .ncode{font-family:var(--mono)!important;font-size:12px;font-weight:600;fill:var(--gi);text-anchor:middle;dominant-baseline:central;letter-spacing:.03em;pointer-events:none}
 .node.center .ncode{font-size:14px}
+.node .ncode.long{font-size:10.5px;letter-spacing:0}
+.node.center .ncode.long{font-size:12.5px}
 .node .nname{font-size:13px;font-weight:700;fill:var(--ink);text-anchor:middle;paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round;pointer-events:none}
 .node .ring2{fill:none;stroke:var(--ink);stroke-width:2;opacity:0}
 .node.sel .ring2,.node.hov .ring2,.node:focus-visible .ring2{opacity:1}
@@ -239,7 +242,7 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
   .hint{display:none}
 }
 @media (max-width:420px){
-  .addrow{grid-template-columns:minmax(0,1fr) 96px}
+  .addrow{grid-template-columns:minmax(0,1fr) 92px 62px}
   .addrow .btn{grid-column:1 / -1}
   .top h1{font-size:20px}
 }
@@ -266,13 +269,19 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
         <div class="addrow">
           <input class="field" id="nameInput" maxlength="16" placeholder="名前" aria-label="名前">
           <select class="field" id="typeInput" aria-label="MBTIタイプ"></select>
+          <select class="field" id="identInput" aria-label="5文字目（A/T）">
+            <option value="">A/T</option>
+            <option value="A">A 自己主張型</option>
+            <option value="T">T 慎重型</option>
+          </select>
           <button class="btn" type="submit">追加</button>
         </div>
+        <div class="identhint">5文字目のA/Tは任意です。A＝自己主張型、T＝慎重型。わかる人だけ選ぶと、相性に反映されます</div>
         <div class="formmsg" id="formMsg" aria-live="polite"></div>
       </form>
       <details class="bulk">
         <summary>まとめて貼り付けで追加</summary>
-        <textarea id="bulkInput" placeholder="1行に1人ずつ（例）&#10;たかし INTJ&#10;はなこ, ESFJ"></textarea>
+        <textarea id="bulkInput" placeholder="1行に1人ずつ（例）&#10;たかし INTJ-A&#10;はなこ, ESFJ-T&#10;じろう ISTP"></textarea>
         <div class="row"><button class="btn ghost small" id="bulkAdd" type="button">読み込む</button></div>
       </details>
       <ul class="members" id="memberList"></ul>
@@ -284,7 +293,7 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 
     <section class="panel" id="detail" aria-live="polite"></section>
 
-    <p class="note">相性スコアはMBTIの4つの指標（E/I・N/S・T/F・J/P）の組み合わせから算出した目安です。性格タイプは人を決めつけるものではないので、話のきっかけとして使ってください。</p>
+    <p class="note">相性スコアはMBTIの4つの指標（E/I・N/S・T/F・J/P）と、入力されていれば5文字目のA/Tの組み合わせから算出した目安です。性格タイプは人を決めつけるものではないので、話のきっかけとして使ってください。</p>
   </aside>
 
   <section class="stage" id="stage" aria-label="相性マップ">
@@ -328,7 +337,11 @@ const TIERS = [
   { key:'t3', name:'ふつう',     min:58 },
   { key:'t4', name:'要歩み寄り', min:0  }
 ];
-const MIN_SCORE = 45, MAX_SCORE = 98;
+const MIN_SCORE = 45, MAX_SCORE = 100;
+const IDENT = { A:'自己主張型', T:'慎重型' };
+
+// 表示・相性計算に使うコード（例: INFJ-A）。5文字目が未入力なら4文字のまま
+const codeOf = m => m.type + (m.ident ? '-' + m.ident : '');
 
 const groupOf = t => t[1] === 'N' ? (t[2] === 'T' ? 'nt' : 'nf') : (t[3] === 'J' ? 'sj' : 'sp');
 const tierOf = s => TIERS.find(x => s >= x.min);
@@ -351,7 +364,8 @@ function shortOf(i, a, b) {
   if (i === 0) return x !== y ? '話す役・聴く役に分かれてバランスがいい' : x === 'E' ? '話の主導権を取り合いがち' : '踏み込むきっかけが少なめ';
   if (i === 1) return x === y ? (x === 'N' ? 'アイデアや可能性の話で盛り上がれる' : '具体的な段取りの話がすっと通じる') : '見ている景色が違い、話がすれ違いやすい';
   if (i === 2) return x === y ? (x === 'T' ? '筋道立てた議論がスムーズ' : 'お互いの気持ちを汲み合える') : '言い方ひとつで誤解が生まれやすい';
-  return x !== y ? '段取りと臨機応変さを補い合える' : x === 'J' ? '進め方のこだわりがぶつかりやすい' : '決め事が後回しになりがち';
+  if (i === 3) return x !== y ? '段取りと臨機応変さを補い合える' : x === 'J' ? '進め方のこだわりがぶつかりやすい' : '決め事が後回しになりがち';
+  return x !== y ? 'Aの落ち着きが、Tの不安をやわらげる' : x === 'A' ? 'どちらも動じないぶん、反省点を見落としがち' : 'どちらも心配性で、不安が伝染しやすい';
 }
 
 const compatCache = new Map();
@@ -389,10 +403,19 @@ function compat(a, b) {
   else if (a[3] === 'J') { f.push({ axis:'物事の進め方', i:3, d:0, text:'どちらも計画型（J）。進め方へのこだわりがぶつかることがあります。' }); }
   else { f.push({ axis:'物事の進め方', i:3, d:0, text:'どちらも柔軟型（P）。自由で楽しい反面、決め事が後回しになりがち。' }); }
 
-  f.forEach(x => { x.s = shortOf(x.i, a, b); x.good = x.d >= 8; });
+  // A/T（5文字目）。両方わかっているときだけ加点する
+  const ia = a[5], ib = b[5];
+  if (ia && ib) {
+    if (ia !== ib) { s += 5; f.push({ axis:'ストレスへの反応', i:5, d:5, good:true, text:'自己主張型（A）と慎重型（T）。Aの落ち着きがTの不安を支え、Tの慎重さがAの見落としを補います。' }); }
+    else if (ia === 'A') { s += 3; f.push({ axis:'ストレスへの反応', i:5, d:3, good:false, text:'どちらも自己主張型（A）。動じにくく安定した関係ですが、お互いに反省点を見落としがち。' }); }
+    else { f.push({ axis:'ストレスへの反応', i:5, d:0, good:false, text:'どちらも慎重型（T）。向上心が強く分かり合える一方、不安や焦りが伝染しやすい組み合わせ。' }); }
+  }
+  s = Math.min(s, MAX_SCORE);
+
+  f.forEach(x => { x.s = shortOf(x.i, a, b); if (x.good === undefined) x.good = x.d >= 8; });
 
   let relation = null;
-  if (a === b) relation = { name:'ミラー', text:'同じタイプ同士。説明しなくても分かり合える反面、同じ弱点も抱えやすい関係です。' };
+  if (a.slice(0, 4) === b.slice(0, 4)) relation = { name:'ミラー', text:'同じタイプ同士。説明しなくても分かり合える反面、同じ弱点も抱えやすい関係です。' };
   else if (a[1] === b[1] && a[0] !== b[0] && a[3] !== b[3]) relation = { name:'黄金ペア', text:'見ている世界（N/S）は同じで、エネルギーの向きと進め方が逆。自然と補い合える組み合わせです。' };
   else if ([0,1,2,3].every(i => a[i] !== b[i])) relation = { name:'正反対', text:'4つの指標がすべて逆。刺激は大きいけれど、理解し合うまでに時間がかかる組み合わせです。' };
 
@@ -406,6 +429,9 @@ function compat(a, b) {
   if (a[3] === b[3] && a[3] === 'P') tips.push('締め切りや決め事はカレンダーやタスク管理に任せて、外に出しておきましょう。');
   if (a[0] === b[0] && a[0] === 'E') tips.push('話す時間を交互に。相手の話を最後まで聞く意識を持つとさらに良くなります。');
   if (a[0] === b[0] && a[0] === 'I') tips.push('気になることは溜めずに、テキストでもいいので早めに共有を。');
+  if (ia && ib && ia !== ib) tips.push('A側は結論を急がず、T側の心配ごとを一度受け止めてから話を進めて。');
+  if (ia === 'A' && ib === 'A') tips.push('うまくいった時ほど、振り返りの時間をあえて取りましょう。');
+  if (ia === 'T' && ib === 'T') tips.push('不安なときは一人で抱え込まず、早めに言葉にして共有を。');
   if (!tips.length) tips.push('相性は抜群。なれ合いにならないよう、ときどき率直なフィードバックを交わしましょう。');
 
   const res = { score:s, tier:tierOf(s), factors:f, relation, shared, tips };
@@ -414,7 +440,7 @@ function compat(a, b) {
 }
 
 /* ---------- state ---------- */
-const SAMPLE = [['さくら','INFJ'],['けんた','ENTP'],['ゆい','ISFJ'],['はると','ESTP'],['みお','ENFP'],['そうた','ISTJ'],['あおい','INTP']];
+const SAMPLE = [['さくら','INFJ','T'],['けんた','ENTP','A'],['ゆい','ISFJ','T'],['はると','ESTP','A'],['みお','ENFP','T'],['そうた','ISTJ','A'],['あおい','INTP','']];
 const STORE_KEY = 'mbti-compat-map-v1';
 const MAX_MEMBERS = 20;
 
@@ -436,14 +462,14 @@ function load() {
     const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
     if (!d || !Array.isArray(d.members)) return false;
     members = d.members.filter(m => m && TYPES.includes(m.type) && Number.isInteger(m.id))
-      .map(m => ({ id:m.id, name:String(m.name || '').slice(0, 16) || '名無し', type:m.type }));
+      .map(m => ({ id:m.id, name:String(m.name || '').slice(0, 16) || '名無し', type:m.type, ident:IDENT[m.ident] ? m.ident : '' }));
     nextId = Math.max(d.nextId || 1, ...members.map(m => m.id + 1), 1);
     state.isSample = !!d.isSample;
     return true;
   } catch (e) { return false; }
 }
 function loadSample() {
-  members = SAMPLE.map(([name, type], i) => ({ id:i + 1, name, type }));
+  members = SAMPLE.map(([name, type, ident], i) => ({ id:i + 1, name, type, ident }));
   nextId = members.length + 1;
   state.isSample = true;
 }
@@ -454,7 +480,7 @@ function allPairs() {
   for (let i = 0; i < members.length; i++)
     for (let j = i + 1; j < members.length; j++) {
       const a = members[i], b = members[j];
-      out.push({ a, b, c:compat(a.type, b.type) });
+      out.push({ a, b, c:compat(codeOf(a), codeOf(b)) });
     }
   return out;
 }
@@ -466,7 +492,7 @@ function forceLayout(seed) {
     x: Math.cos(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 37) % 11) - 5,
     y: Math.sin(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 53) % 13) - 6
   });
-  const S = members.map(a => members.map(b => compat(a.type, b.type).score));
+  const S = members.map(a => members.map(b => compat(codeOf(a), codeOf(b)).score));
   const IT = 600;
   for (let it = 0; it < IT; it++) {
     const alpha = 1 - it / IT;
@@ -501,7 +527,7 @@ function fitVB(p) {
 function focusLayout(cid) {
   const c = byId(cid);
   const others = members.filter(m => m.id !== cid)
-    .map(m => ({ m, s:compat(c.type, m.type).score }))
+    .map(m => ({ m, s:compat(codeOf(c), codeOf(m)).score }))
     .sort((p, q) => q.s - p.s || p.m.id - q.m.id);
   const n = others.length;
   const rmin = Math.max(135, n * 74 / (2 * Math.PI));
@@ -561,7 +587,7 @@ function rebuildScene() {
       lbl.textContent = `${t.min}+ ${t.name}`;
     }
     members.filter(m => m.id !== c.id).forEach((m, i) => {
-      const cc = compat(c.type, m.type);
+      const cc = compat(codeOf(c), codeOf(m));
       if (state.hidden.has(cc.tier.key)) return;
       const g = el('g', { class:`edge branch ${cc.tier.key}`, 'data-a':c.id, 'data-b':m.id }, gEdges);
       const w = 2 + (cc.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5;
@@ -576,11 +602,11 @@ function rebuildScene() {
     const r = state.mode === 'overview' ? 30 : (isCenter ? 42 : 28);
     const g = el('g', {
       class:`node g-${groupOf(m.type)}${isCenter ? ' center' : ''}`, 'data-id':m.id,
-      tabindex:0, role:'button', 'aria-label':`${m.name}（${m.type}）`
+      tabindex:0, role:'button', 'aria-label':`${m.name}（${codeOf(m)}）`
     }, gNodes);
     el('circle', { class:'ring2', r:r + 6 }, g);
     el('circle', { r }, g);
-    const code = el('text', { class:'ncode', y:0 }, g); code.textContent = m.type;
+    const code = el('text', { class:`ncode${m.ident ? ' long' : ''}`, y:0 }, g); code.textContent = codeOf(m);
     const nm = el('text', { class:'nname', y:r + 18 }, g); nm.textContent = m.name;
     sceneNodes[m.id] = g;
   }
@@ -667,7 +693,7 @@ const emptyMsg = document.getElementById('emptyMsg');
 function renderChrome() {
   const focus = state.mode === 'focus';
   const c = focus ? byId(state.focusId) : null;
-  mapTitle.textContent = focus ? `${c.name}（${c.type}）から見た相性` : '全体マップ';
+  mapTitle.textContent = focus ? `${c.name}（${codeOf(c)}）から見た相性` : '全体マップ';
   backBtn.hidden = !focus;
   relayoutBtn.hidden = focus || members.length < 3;
   hint.textContent = focus
@@ -675,7 +701,7 @@ function renderChrome() {
     : '線や丸にマウスを乗せると相性の中身 ／ 丸をクリックでその人中心 ／ ドラッグで移動';
 
   const counts = { t1:0, t2:0, t3:0, t4:0 };
-  if (focus) members.forEach(m => { if (m.id !== c.id) counts[compat(c.type, m.type).tier.key]++; });
+  if (focus) members.forEach(m => { if (m.id !== c.id) counts[compat(codeOf(c), codeOf(m)).tier.key]++; });
   else allPairs().forEach(p => counts[p.c.tier.key]++);
   legend.innerHTML = TIERS.map(t =>
     `<button type="button" class="chip ${t.key}" data-tier="${t.key}" aria-pressed="${!state.hidden.has(t.key)}"><span class="sw"></span>${t.name}<span class="c">${counts[t.key]}</span></button>`
@@ -712,11 +738,14 @@ function renderMembers() {
       <span class="dot g-${groupOf(m.type)}"></span>
       <button type="button" class="mname" data-focus="${m.id}" title="${esc(m.name)}を中心に表示">${esc(m.name)}</button>
       <select id="type-${m.id}" data-type="${m.id}" aria-label="${esc(m.name)}のタイプ">${typeOptions(m.type)}</select>
+      <select id="ident-${m.id}" data-ident="${m.id}" aria-label="${esc(m.name)}の5文字目（A/T）" title="A＝自己主張型 / T＝慎重型">
+        <option value=""${m.ident ? '' : ' selected'}>—</option><option value="A"${m.ident === 'A' ? ' selected' : ''}>-A</option><option value="T"${m.ident === 'T' ? ' selected' : ''}>-T</option>
+      </select>
       <button type="button" class="x" data-del="${m.id}" aria-label="${esc(m.name)}を削除">×</button>
     </li>`).join('');
 }
 
-const personChip = m => `<span class="dot g-${groupOf(m.type)}"></span><span class="t">${esc(m.name)}</span><span class="code">${m.type}</span>`;
+const personChip = m => `<span class="dot g-${groupOf(m.type)}"></span><span class="t">${esc(m.name)}</span><span class="code">${codeOf(m)}</span>`;
 
 function pairRow(a, b, c) {
   return `<li><button type="button" class="rowbtn" data-pair="${a.id},${b.id}">
@@ -750,25 +779,30 @@ function renderTeam() {
     <h3>相性ベスト</h3>
     <ul class="rank">${best.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>
     ${worst.length ? `<h3>歩み寄りが大事な組み合わせ</h3><ul class="rank">${worst.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>` : ''}
-    <h3>4つの指標の分布</h3>
+    <h3>指標ごとの分布</h3>
     <div class="dist">${axes.map(([l, r, i]) => {
       const c = cnt(i);
       return `<div class="drow"><span>${l} ${c}</span><span class="split" role="img" aria-label="${l} ${c}人、${r} ${n - c}人"><i style="width:${c / n * 100}%"></i><i style="width:${(n - c) / n * 100}%"></i></span><span class="r">${n - c} ${r}</span></div>`;
-    }).join('')}</div>
+    }).join('')}${(() => {
+      const a = members.filter(m => m.ident === 'A').length, t = members.filter(m => m.ident === 'T').length, u = n - a - t;
+      if (!a && !t) return '';
+      return `<div class="drow"><span>A ${a}</span><span class="split" role="img" aria-label="A ${a}人、T ${t}人、未入力 ${u}人"><i style="width:${a / n * 100}%"></i><i style="width:${t / n * 100}%"></i></span><span class="r">${t} T</span></div>`
+        + (u ? `<div class="identhint" style="margin-top:0">A/T未入力: ${u}人</div>` : '');
+    })()}</div>
     <div class="groups">${Object.keys(groups).map(g => `<span><span class="dot g-${g}"></span>${GROUPS[g]} ${groups[g]}</span>`).join('')}</div>`;
 }
 
 function renderMember(id) {
   const m = byId(id);
   const st = stackOf(m.type);
-  const ranks = members.filter(o => o.id !== id).map(o => ({ o, c:compat(m.type, o.type) }))
+  const ranks = members.filter(o => o.id !== id).map(o => ({ o, c:compat(codeOf(m), codeOf(o)) }))
     .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
   const labels = ['主機能','補助','第三','劣等'];
   detail.innerHTML = `
     <button type="button" class="backlink" data-act="overview">← チーム全体へ</button>
     <div class="who g-${groupOf(m.type)}">
-      <span class="badge-type">${m.type}</span>
-      <div><div class="nm">${esc(m.name)}</div><div class="sub">${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}</div></div>
+      <span class="badge-type">${codeOf(m)}</span>
+      <div><div class="nm">${esc(m.name)}</div><div class="sub">${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}${m.ident ? ` · ${IDENT[m.ident]}（${m.ident}）` : ''}</div></div>
     </div>
     <div class="fns">${st.map((f, i) => `<div class="fn"><small>${labels[i]}</small><b>${f}</b><span>${FN_NAME[f]}</span></div>`).join('')}</div>
     <h3>相性ランキング</h3>
@@ -780,7 +814,7 @@ function renderMember(id) {
 
 function renderPair(aId, bId) {
   const a = byId(aId), b = byId(bId);
-  const c = compat(a.type, b.type);
+  const c = compat(codeOf(a), codeOf(b));
   const back = state.mode === 'focus' ? `${esc(byId(state.focusId).name)}の相性一覧へ` : 'チーム全体へ';
   detail.innerHTML = `
     <button type="button" class="backlink" data-act="unpair">← ${back}</button>
@@ -792,10 +826,10 @@ function renderPair(aId, bId) {
       <div class="meta"><span class="tier ${c.tier.key}">${c.tier.name}</span>${c.relation ? `<span><span class="rel">${c.relation.name}</span></span>` : ''}</div>
     </div>
     ${c.relation ? `<p class="reltext">${c.relation.text}</p>` : ''}
-    <h3>4つの指標で見ると</h3>
+    <h3>指標ごとに見ると</h3>
     <ul class="axes">${c.factors.map(f => `<li class="axis">
       <span class="an">${f.axis}</span>
-      <span class="ab">${a.type[f.i]} · ${b.type[f.i]}</span>
+      <span class="ab">${codeOf(a)[f.i]} · ${codeOf(b)[f.i]}</span>
       <span class="dv ${f.d > 0 ? 'plus' : f.d < 0 ? 'minus' : ''}">${f.d > 0 ? '+' : ''}${f.d}</span>
       <p>${f.text}</p></li>`).join('')}</ul>
     ${c.shared.length ? `<h3>共通の得意な心理機能</h3><p class="muted">${c.shared.map(f => `<b class="code" style="color:var(--ink)">${f}</b> ${FN_NAME[f]}`).join('、')}。考え方の「クセ」が似ているので、説明なしで通じる場面が多いはず。</p>` : ''}
@@ -850,9 +884,9 @@ function refresh(instant) {
   renderMembers(); renderChrome(); renderPanel(); save();
 }
 
-function addMember(name, type) {
+function addMember(name, type, ident) {
   if (members.length >= MAX_MEMBERS) return false;
-  members.push({ id:nextId++, name:(name || '').trim().slice(0, 16) || `メンバー${members.length + 1}`, type });
+  members.push({ id:nextId++, name:(name || '').trim().slice(0, 16) || `メンバー${members.length + 1}`, type, ident:IDENT[ident] ? ident : '' });
   return true;
 }
 
@@ -865,9 +899,12 @@ document.getElementById('addForm').addEventListener('submit', e => {
   const type = typeInput.value;
   if (!type) { say('タイプを選んでください', true); typeInput.focus(); return; }
   if (members.length >= MAX_MEMBERS) { say(`登録できるのは${MAX_MEMBERS}人までです`, true); return; }
-  addMember(nameEl.value, type);
+  const identEl = document.getElementById('identInput');
+  addMember(nameEl.value, type, identEl.value);
   state.isSample = false;
-  say(`${members[members.length - 1].name}（${type}）を追加しました`);
+  const added = members[members.length - 1];
+  say(`${added.name}（${codeOf(added)}）を追加しました`);
+  identEl.value = '';
   nameEl.value = ''; nameEl.focus();
   refresh();
 });
@@ -877,13 +914,13 @@ document.getElementById('bulkAdd').addEventListener('click', () => {
   const lines = ta.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
   let added = 0, bad = 0, full = 0;
   for (const line of lines) {
-    const m = line.toUpperCase().match(/\b([EI][NS][TF][JP])(?:-[AT])?\b/);
+    const m = line.toUpperCase().match(/\b([EI][NS][TF][JP])(?:-([AT]))?\b/);
     if (!m) { bad++; continue; }
     const name = line.replace(new RegExp(m[0].replace('-', '\\-'), 'i'), '').replace(/[,、，:：\t|]/g, ' ').trim();
-    if (!addMember(name, m[1])) { full++; continue; }
+    if (!addMember(name, m[1], m[2] || '')) { full++; continue; }
     added++;
   }
-  if (!added) { say(lines.length ? '読み取れる行がありませんでした。「名前 INFJ」の形で入力してください' : '貼り付け欄が空です', true); return; }
+  if (!added) { say(lines.length ? '読み取れる行がありませんでした。「名前 INFJ」または「名前 INFJ-A」の形で入力してください' : '貼り付け欄が空です', true); return; }
   state.isSample = false;
   ta.value = '';
   say(`${added}人を追加しました` + (bad ? `（${bad}行は読み取れませんでした）` : '') + (full ? `（上限のため${full}人は追加できませんでした）` : ''), !!(bad || full));
@@ -914,9 +951,11 @@ clearAllBtn.addEventListener('click', () => {
 });
 
 memberList.addEventListener('change', e => {
-  const id = +e.target.dataset.type; if (!id) return;
-  const m = byId(id); if (!m) return;
-  m.type = e.target.value; state.isSample = false;
+  const t = e.target;
+  const m = byId(+(t.dataset.type || t.dataset.ident)); if (!m) return;
+  if (t.dataset.type) m.type = t.value;
+  else m.ident = IDENT[t.value] ? t.value : '';
+  state.isSample = false;
   refresh();
 });
 
@@ -966,9 +1005,9 @@ const tip = document.getElementById('tip');
 let tipKey = null;
 
 function pairTipHTML(a, b) {
-  const c = compat(a.type, b.type);
+  const c = compat(codeOf(a), codeOf(b));
   const good = c.factors.filter(f => f.good), bad = c.factors.filter(f => !f.good);
-  const li = f => `<li><span class="ab">${a.type[f.i]}·${b.type[f.i]}</span><span>${f.s}</span></li>`;
+  const li = f => `<li><span class="ab">${codeOf(a)[f.i]}·${codeOf(b)[f.i]}</span><span>${f.s}</span></li>`;
   return `
     <div class="th">${personChip(a)}<span class="code">×</span>${personChip(b)}</div>
     <div class="ts"><b>${c.score}</b><span class="tier ${c.tier.key}">${c.tier.name}</span>${c.relation ? `<span class="rel">${c.relation.name}</span>` : ''}</div>
@@ -982,7 +1021,7 @@ function pairTipHTML(a, b) {
 }
 
 function memberTipHTML(m) {
-  const r = members.filter(o => o.id !== m.id).map(o => ({ o, c:compat(m.type, o.type) }))
+  const r = members.filter(o => o.id !== m.id).map(o => ({ o, c:compat(codeOf(m), codeOf(o)) }))
     .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
   const row = ({ o, c }) => `<li class="mp">${personChip(o)}<span class="num">${c.score}</span><span class="tier ${c.tier.key}">${c.tier.name}</span></li>`;
   const best = r.filter(x => x.c.score === r[0].c.score).slice(0, 3);
@@ -990,7 +1029,7 @@ function memberTipHTML(m) {
   const worst = r.length > 1 && last.c.score < r[0].c.score ? r.filter(x => x.c.score === last.c.score).slice(0, 3) : [];
   return `
     <div class="th">${personChip(m)}</div>
-    <div class="sub">${DESC[m.type]} · ${GROUPS[groupOf(m.type)]} · 主機能 ${stackOf(m.type)[0]}（${FN_NAME[stackOf(m.type)[0]]}）</div>
+    <div class="sub">${DESC[m.type]}${m.ident ? `（${IDENT[m.ident]}）` : ''} · ${GROUPS[groupOf(m.type)]} · 主機能 ${stackOf(m.type)[0]}（${FN_NAME[stackOf(m.type)[0]]}）</div>
     <h4 class="good">いちばん相性がいい</h4><ul>${best.map(row).join('')}</ul>
     ${worst.length ? `<h4 class="bad">歩み寄りが大事</h4><ul>${worst.map(row).join('')}</ul>` : ''}
     <div class="tf">クリックでこの人を中心にしたマップへ ／ 線に乗せるとペアの詳細</div>`;
