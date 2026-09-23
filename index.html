@@ -89,9 +89,13 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 .tag{font-size:11px;font-weight:700;letter-spacing:.04em;border:1px solid var(--line);border-radius:99px;padding:0 8px;color:var(--ink-2)}
 
 .members{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
-.mem{display:grid;grid-template-columns:12px minmax(0,1fr) 78px 50px 28px;align-items:center;gap:8px;padding-block:5px;border-top:1px solid var(--line)}
+.mem{display:grid;grid-template-columns:22px minmax(0,1fr) 78px 50px 28px;align-items:center;gap:8px;padding-block:5px;border-top:1px solid var(--line)}
 .mem:first-child{border-top:0}
 .dot{width:12px;height:12px;border-radius:50%;background:var(--g)}
+.ico{display:block;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tb{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;background:var(--g);color:var(--gi);flex:none}
+.idn{font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap;flex:none}
+.code{white-space:nowrap}
 .g-nt{--g:var(--nt);--gi:var(--on-nt)} .g-nf{--g:var(--nf);--gi:var(--on-nf)}
 .g-sj{--g:var(--sj);--gi:var(--on-sj)} .g-sp{--g:var(--sp);--gi:var(--on-sp)}
 .mname{background:none;border:0;padding:4px 0;text-align:left;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -103,7 +107,9 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 
 /* detail */
 .who{display:flex;align-items:center;gap:12px}
-.badge-type{font-family:var(--mono);font-weight:600;font-size:15px;background:var(--g);color:var(--gi);border-radius:10px;padding:6px 10px;letter-spacing:.04em}
+.badge-type{display:flex;align-items:center;justify-content:center;width:48px;height:48px;flex:none;background:var(--g);color:var(--gi);border-radius:13px}
+.badge-type .ico{width:28px;height:28px;stroke-width:1.7}
+.who .sub .code{color:var(--ink);font-weight:600}
 .who .nm{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.3;word-break:break-all}
 .who .sub{font-size:12px;color:var(--ink-2)}
 .fns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
@@ -116,7 +122,8 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 .rowbtn{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 72px 30px;align-items:center;gap:10px;background:none;border:0;border-radius:9px;padding:7px 6px;text-align:left}
 .rowbtn:hover{background:var(--surface-2)}
 .rowbtn .who2{display:flex;align-items:center;gap:7px;min-width:0}
-.rowbtn .who2 span.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rowbtn .who2 span.t{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rowbtn .duo{display:flex;flex-direction:column;gap:4px;min-width:0}
 .code{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
 .bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .bar i{display:block;height:100%;border-radius:99px;background:var(--tc)}
@@ -223,10 +230,8 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 .ringlabel{font-size:11px;fill:var(--ink-2);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
 .node{cursor:pointer;outline:none;touch-action:none}
 .node circle{fill:var(--g);stroke:var(--surface);stroke-width:3;transition:stroke .15s}
-.node .ncode{font-family:var(--mono)!important;font-size:12px;font-weight:600;fill:var(--gi);text-anchor:middle;dominant-baseline:central;letter-spacing:.03em;pointer-events:none}
-.node.center .ncode{font-size:14px}
-.node .ncode.long{font-size:10.5px;letter-spacing:0}
-.node.center .ncode.long{font-size:12.5px}
+.node .nicon{fill:none;stroke:var(--gi);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.node .ncode{font-family:var(--mono)!important;font-size:10.5px;font-weight:500;fill:var(--ink-2);text-anchor:middle;paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round;pointer-events:none}
 .node .nname{font-size:13px;font-weight:700;fill:var(--ink);text-anchor:middle;paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round;pointer-events:none}
 .node .ring2{fill:none;stroke:var(--ink);stroke-width:2;opacity:0}
 .node.sel .ring2,.node.hov .ring2,.node:focus-visible .ring2{opacity:1}
@@ -329,6 +334,26 @@ const DESC = {
   ISTJ:'管理者', ISFJ:'擁護者',   ESTJ:'幹部',   ESFJ:'領事',
   ISTP:'巨匠',   ISFP:'冒険家',   ESTP:'起業家', ESFP:'エンターテイナー'
 };
+// タイプごとの呼び名に合わせたアイコン（24×24、線画）
+const ICONS = {
+  INTJ:'<path d="M3 21h18M5.5 21v-9.5M18.5 21v-9.5M10 21v-7M14 21v-7M3 10.5h18L12 4z"/>',
+  INTP:'<path d="M9 3h6M10 3v6.2L4.6 18.4A1.8 1.8 0 0 0 6.2 21h11.6a1.8 1.8 0 0 0 1.6-2.6L14 9.2V3M7.2 15h9.6"/>',
+  ENTJ:'<path d="M5.5 21V3.5M5.5 4.5h12l-2.5 4 2.5 4h-12"/>',
+  ENTP:'<path d="M3 4.5h11v7.5H8.5L5 15v-3H3z"/><path d="M17 8.5h4V16h-2v3l-3.5-3H10v-1.5"/>',
+  INFJ:'<path d="M8.5 21h7M10 21v-9h4v9"/><path d="M12 3c2 2.2 2.4 3.8 0 5.6C9.6 6.8 10 5.2 12 3z"/>',
+  INFP:'<path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.2a4.2 4.2 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"/>',
+  ENFJ:'<path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.2 6.1L12 16.7l-5.5 3 1.2-6.1-4.5-4.2 6.1-.8z"/>',
+  ENFP:'<path d="M3 10v4h3l9.5 5V5L6 10z"/><path d="M6.5 14l1.6 5h2.6l-1.1-4"/><path d="M18.5 9.2a3.5 3.5 0 0 1 0 5.6"/>',
+  ISTJ:'<rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 3h6v3H9zM8.8 13.2l2.2 2.2 4.2-4.4"/>',
+  ISFJ:'<path d="M12 3l7.5 3v5.2c0 4.6-3.2 8-7.5 9.8-4.3-1.8-7.5-5.2-7.5-9.8V6z"/>',
+  ESTJ:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7M3 12.5h18"/>',
+  ESFJ:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.1A5 5 0 0 1 21.5 19"/>',
+  ISTP:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
+  ISFP:'<path d="M2.5 20.5L9.5 9l4.5 7 2.5-3.5 5 8z"/><path d="M9.5 9V3.5l4 1.6-4 1.6"/>',
+  ESTP:'<path d="M12 15.5L8.5 12C10 7.2 13.4 3.6 20.5 3.5 20.4 10.6 16.8 14 12 15.5z"/><path d="M8.5 12H4.5L7 8h4.5M12 15.5v4l4-2.5v-4.5M5.5 18.5L3.5 20.5"/><circle cx="15.3" cy="8.7" r="1.4"/>',
+  ESFP:'<path d="M9 18V5.5l11-2.5v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>'
+};
+const iconSVG = t => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[t]}</svg>`;
 const GROUPS = { nt:'NT 理論派', nf:'NF 理想派', sj:'SJ 堅実派', sp:'SP 行動派' };
 const FN_NAME = { Ne:'外向直観', Ni:'内向直観', Se:'外向感覚', Si:'内向感覚', Te:'外向思考', Ti:'内向思考', Fe:'外向感情', Fi:'内向感情' };
 const TIERS = [
@@ -606,8 +631,11 @@ function rebuildScene() {
     }, gNodes);
     el('circle', { class:'ring2', r:r + 6 }, g);
     el('circle', { r }, g);
-    const code = el('text', { class:`ncode${m.ident ? ' long' : ''}`, y:0 }, g); code.textContent = codeOf(m);
+    const size = isCenter ? 36 : 28;
+    const ic = el('g', { class:'nicon', transform:`translate(${-size / 2},${-size / 2}) scale(${size / 24})` }, g);
+    ic.innerHTML = ICONS[m.type];
     const nm = el('text', { class:'nname', y:r + 18 }, g); nm.textContent = m.name;
+    const code = el('text', { class:'ncode', y:r + 32 }, g); code.textContent = codeOf(m);
     sceneNodes[m.id] = g;
   }
   applyHighlight();
@@ -735,7 +763,7 @@ function renderMembers() {
   document.getElementById('memFoot').hidden = !members.length;
   memberList.innerHTML = members.map(m => `
     <li class="mem">
-      <span class="dot g-${groupOf(m.type)}"></span>
+      <span class="tb g-${groupOf(m.type)}" title="${m.type} ${DESC[m.type]}">${iconSVG(m.type)}</span>
       <button type="button" class="mname" data-focus="${m.id}" title="${esc(m.name)}を中心に表示">${esc(m.name)}</button>
       <select id="type-${m.id}" data-type="${m.id}" aria-label="${esc(m.name)}のタイプ">${typeOptions(m.type)}</select>
       <select id="ident-${m.id}" data-ident="${m.id}" aria-label="${esc(m.name)}の5文字目（A/T）" title="A＝自己主張型 / T＝慎重型">
@@ -745,11 +773,11 @@ function renderMembers() {
     </li>`).join('');
 }
 
-const personChip = m => `<span class="dot g-${groupOf(m.type)}"></span><span class="t">${esc(m.name)}</span><span class="code">${codeOf(m)}</span>`;
+const personChip = m => `<span class="tb g-${groupOf(m.type)}" role="img" title="${codeOf(m)} ${DESC[m.type]}" aria-label="${codeOf(m)} ${DESC[m.type]}">${iconSVG(m.type)}</span><span class="t">${esc(m.name)}</span>${m.ident ? `<span class="idn">-${m.ident}</span>` : ''}`;
 
 function pairRow(a, b, c) {
   return `<li><button type="button" class="rowbtn" data-pair="${a.id},${b.id}">
-    <span class="who2">${personChip(a)}<span class="code">×</span>${personChip(b)}</span>
+    <span class="duo"><span class="who2">${personChip(a)}</span><span class="who2">${personChip(b)}</span></span>
     <span class="bar ${c.tier.key}"><i style="width:${c.score}%"></i></span>
     <span class="num">${c.score}</span></button></li>`;
 }
@@ -801,8 +829,8 @@ function renderMember(id) {
   detail.innerHTML = `
     <button type="button" class="backlink" data-act="overview">← チーム全体へ</button>
     <div class="who g-${groupOf(m.type)}">
-      <span class="badge-type">${codeOf(m)}</span>
-      <div><div class="nm">${esc(m.name)}</div><div class="sub">${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}${m.ident ? ` · ${IDENT[m.ident]}（${m.ident}）` : ''}</div></div>
+      <span class="badge-type" title="${m.type} ${DESC[m.type]}">${iconSVG(m.type)}</span>
+      <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="code">${codeOf(m)}</span> ${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}${m.ident ? ` · ${IDENT[m.ident]}（${m.ident}）` : ''}</div></div>
     </div>
     <div class="fns">${st.map((f, i) => `<div class="fn"><small>${labels[i]}</small><b>${f}</b><span>${FN_NAME[f]}</span></div>`).join('')}</div>
     <h3>相性ランキング</h3>
