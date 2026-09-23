@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="メンバーの名前とMBTIを入力すると、お互いの相性スコアをマインドマップで可視化するツール。">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-family:system-ui,sans-serif;font-size:14px;background:#F1F4F1}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>MBTI相性マップ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#F1F4F1; --surface:#FFFFFF; --surface-2:#E9EEEA; --ink:#1C2320; --ink-2:#5B6660; --line:#D6DDD8;
+  --accent:#1E6E5B; --accent-ink:#FFFFFF; --grid:rgba(28,35,32,.09);
+  --t1:#E03C66; --t2:#EE8FA7; --t3:#AEB8B2; --t4:#5A6D91;
+  --nt:#7A5FC8; --nf:#2B9A72; --sj:#3C78C0; --sp:#E0A016;
+  --on-nt:#FFFFFF; --on-nf:#FFFFFF; --on-sj:#FFFFFF; --on-sp:#2B2105;
+  --display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+  --body:"Noto Sans JP","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#131816; --surface:#1B211E; --surface-2:#252D29; --ink:#E6ECE8; --ink-2:#9BA7A0; --line:#323B37;
+    --accent:#5CC6A6; --accent-ink:#0E1A16; --grid:rgba(230,236,232,.07);
+    --t1:#FF6A8E; --t2:#B8687F; --t3:#4B5550; --t4:#8EA3CC;
+    --nt:#9A83E6; --nf:#45BE92; --sj:#669DE2; --sp:#EDB73C;
+    --on-nt:#140F24; --on-nf:#07190F; --on-sj:#0B1627; --on-sp:#231A03;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#131816; --surface:#1B211E; --surface-2:#252D29; --ink:#E6ECE8; --ink-2:#9BA7A0; --line:#323B37;
+  --accent:#5CC6A6; --accent-ink:#0E1A16; --grid:rgba(230,236,232,.07);
+  --t1:#FF6A8E; --t2:#B8687F; --t3:#4B5550; --t4:#8EA3CC;
+  --nt:#9A83E6; --nf:#45BE92; --sj:#669DE2; --sp:#EDB73C;
+  --on-nt:#140F24; --on-nf:#07190F; --on-sj:#0B1627; --on-sp:#231A03;
+}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.6;padding-inline:16px;display:flex;flex-direction:column}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap;padding-block:14px 12px}
+.top h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0;letter-spacing:.02em}
+.top p{margin:0;color:var(--ink-2);font-size:13px}
+
+.app{flex:1;min-height:0;display:grid;grid-template-columns:350px minmax(0,1fr);gap:16px;padding-bottom:16px}
+.side{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding-right:2px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.panel h2{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink-2);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.panel h3{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ink-2);margin:16px 0 8px}
+
+/* add form */
+.addrow{display:grid;grid-template-columns:minmax(0,1fr) 104px auto;gap:6px}
+.field{height:36px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:0 10px;min-width:0}
+select.field{padding:0 6px}
+.btn{height:36px;border-radius:9px;border:1px solid transparent;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:0 14px;white-space:nowrap}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink);font-weight:500}
+.btn.small{height:30px;padding:0 10px;font-size:12px}
+.formmsg{min-height:1.4em;font-size:12px;color:var(--ink-2);margin-top:6px}
+.formmsg.err{color:var(--t1)}
+details.bulk{margin-top:4px}
+details.bulk summary{font-size:12px;color:var(--ink-2);cursor:pointer;width:max-content}
+details.bulk textarea{width:100%;min-height:92px;margin-top:8px;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:8px 10px;resize:vertical;font-family:var(--mono);font-size:13px}
+details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
+
+.samplenote{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border-radius:9px;padding:8px 10px;font-size:12px;color:var(--ink-2);margin-bottom:10px}
+.tag{font-size:11px;font-weight:700;letter-spacing:.04em;border:1px solid var(--line);border-radius:99px;padding:0 8px;color:var(--ink-2)}
+
+.members{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
+.mem{display:grid;grid-template-columns:12px minmax(0,1fr) 92px 28px;align-items:center;gap:8px;padding-block:5px;border-top:1px solid var(--line)}
+.mem:first-child{border-top:0}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--g)}
+.g-nt{--g:var(--nt);--gi:var(--on-nt)} .g-nf{--g:var(--nf);--gi:var(--on-nf)}
+.g-sj{--g:var(--sj);--gi:var(--on-sj)} .g-sp{--g:var(--sp);--gi:var(--on-sp)}
+.mname{background:none;border:0;padding:4px 0;text-align:left;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mname:hover{color:var(--accent)}
+.mem select{height:30px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-family:var(--mono);font-size:12px;padding:0 4px;min-width:0}
+.x{width:28px;height:28px;border-radius:8px;border:0;background:transparent;color:var(--ink-2);font-size:17px;line-height:1}
+.x:hover{background:var(--surface-2);color:var(--ink)}
+.memfoot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--ink-2)}
+
+/* detail */
+.who{display:flex;align-items:center;gap:12px}
+.badge-type{font-family:var(--mono);font-weight:600;font-size:15px;background:var(--g);color:var(--gi);border-radius:10px;padding:6px 10px;letter-spacing:.04em}
+.who .nm{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.3;word-break:break-all}
+.who .sub{font-size:12px;color:var(--ink-2)}
+.fns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
+.fn{background:var(--surface-2);border-radius:9px;padding:6px 4px;text-align:center}
+.fn b{display:block;font-family:var(--mono);font-size:14px}
+.fn span{display:block;font-size:10.5px;color:var(--ink-2);line-height:1.35}
+.fn small{display:block;font-size:10px;color:var(--ink-2);letter-spacing:.05em}
+
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rowbtn{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 72px 30px;align-items:center;gap:10px;background:none;border:0;border-radius:9px;padding:7px 6px;text-align:left}
+.rowbtn:hover{background:var(--surface-2)}
+.rowbtn .who2{display:flex;align-items:center;gap:7px;min-width:0}
+.rowbtn .who2 span.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.code{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--tc)}
+.num{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.t1{--tc:var(--t1)} .t2{--tc:var(--t2)} .t3{--tc:var(--t3)} .t4{--tc:var(--t4)}
+.tier{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;white-space:nowrap}
+.tier::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--tc)}
+.tier.t4::before{background:transparent;border:2px dashed var(--tc);width:6px;height:6px}
+.rel{font-size:11px;font-weight:700;border:1px solid var(--ink-2);color:var(--ink);border-radius:99px;padding:1px 8px}
+
+.pairhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pairhead .p{display:flex;align-items:center;gap:6px;font-weight:700}
+.pairhead .times{color:var(--ink-2)}
+.scorebox{display:flex;align-items:flex-end;gap:12px;margin-top:12px;flex-wrap:wrap}
+.scorebox .big{font-family:var(--mono);font-weight:600;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.scorebox .big small{font-size:14px;color:var(--ink-2);font-weight:500}
+.scorebox .meta{display:flex;flex-direction:column;gap:4px;padding-bottom:4px}
+.reltext{font-size:13px;color:var(--ink-2);margin:10px 0 0}
+.axes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.axis{display:grid;grid-template-columns:78px minmax(0,1fr) 38px;gap:4px 10px;padding-block:9px;border-top:1px solid var(--line)}
+.axis:first-child{border-top:0}
+.axis .an{font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.axis .ab{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.06em}
+.axis .dv{font-family:var(--mono);font-size:12px;text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.axis .dv.plus{color:var(--accent)}
+.axis .dv.minus{color:var(--t1)}
+.axis p{grid-column:1 / -1;margin:0;font-size:13px}
+.tips{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.backlink{background:none;border:0;padding:0;color:var(--ink-2);font-size:12px;margin-bottom:10px}
+.backlink:hover{color:var(--accent)}
+
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stat{background:var(--surface-2);border-radius:10px;padding:8px 12px}
+.stat b{display:block;font-family:var(--mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat span{font-size:11.5px;color:var(--ink-2)}
+.dist{display:flex;flex-direction:column;gap:7px}
+.drow{display:grid;grid-template-columns:34px minmax(0,1fr) 34px;align-items:center;gap:8px;font-family:var(--mono);font-size:12px}
+.drow .r{text-align:right}
+.split{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--surface-2)}
+.split i{display:block;height:100%}
+.split i:first-child{background:var(--accent)}
+.split i:last-child{background:var(--t3)}
+.groups{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:10px}
+.groups span{display:inline-flex;align-items:center;gap:6px}
+.muted{color:var(--ink-2);font-size:13px;margin:0}
+.note{font-size:11.5px;color:var(--ink-2);line-height:1.65;margin:0;padding-inline:4px}
+
+/* stage */
+.stage{position:relative;min-height:0;background-color:var(--surface);background-image:radial-gradient(var(--grid) 1.2px,transparent 1.3px);background-size:22px 22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+#map{display:block;width:100%;height:100%;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none}
+.maphead{position:absolute;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:8px;pointer-events:none;flex-wrap:wrap}
+.maphead > *{pointer-events:auto}
+.maptitle{font-family:var(--display);font-weight:700;font-size:16px;background:var(--surface);border-radius:9px;padding:3px 10px;box-shadow:0 0 0 1px var(--line)}
+.maphead .spacer{flex:1}
+.mapfoot{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;pointer-events:none;flex-wrap:wrap}
+.mapfoot > *{pointer-events:auto}
+.legend{display:flex;gap:4px;flex-wrap:wrap;background:var(--surface);border-radius:10px;padding:4px;box-shadow:0 0 0 1px var(--line)}
+.chip{border:0;background:transparent;border-radius:7px;padding:3px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+.chip .sw{width:18px;height:0;border-top:3px solid var(--tc);border-radius:2px}
+.chip.t4 .sw{border-top-style:dashed}
+.chip .c{font-family:var(--mono);color:var(--ink-2);font-size:11px}
+.chip[aria-pressed="false"]{opacity:.4}
+.chip[aria-pressed="false"] .sw{border-top-color:var(--ink-2)}
+.chip:hover{background:var(--surface-2)}
+.hint{font-size:11.5px;color:var(--ink-2);background:var(--surface);border-radius:9px;padding:4px 10px;box-shadow:0 0 0 1px var(--line);max-width:100%}
+.empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--ink-2);pointer-events:none;font-family:var(--display);font-size:16px}
+
+/* tooltip */
+.tip{position:absolute;z-index:5;left:0;top:0;width:min(300px,calc(100% - 24px));background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 28px rgba(10,20,15,.16);padding:10px 12px 9px;pointer-events:none;font-size:12.5px;line-height:1.55}
+.tip .th{display:flex;align-items:center;gap:6px;font-weight:700;flex-wrap:wrap}
+.tip .th .t{max-width:8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tip .ts{display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap}
+.tip .ts b{font-family:var(--mono);font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.tip .sub{font-size:11.5px;color:var(--ink-2)}
+.tip h4{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-2);margin:9px 0 3px;display:flex;align-items:center;gap:6px}
+.tip h4::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--mk,var(--ink-2))}
+.tip h4.good{--mk:var(--accent)}
+.tip h4.bad{--mk:var(--t1)}
+.tip ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
+.tip .fl li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:6px}
+.tip .fl .ab{font-family:var(--mono);font-size:11px;color:var(--ink-2);padding-top:1px}
+.tip .tt li{padding-left:1em;text-indent:-1em}
+.tip .tt li::before{content:"・"}
+.tip .tf{margin-top:8px;padding-top:6px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-2)}
+.tip .mp{display:flex;align-items:center;gap:6px}
+.tip .mp .num{margin-left:auto}
+
+/* svg */
+#map text{font-family:var(--body)}
+.edge .vis{fill:none;stroke:var(--tc);stroke-linecap:round;transition:opacity .2s}
+.edge.t3 .vis{opacity:.5}
+.edge.t4 .vis{stroke-dasharray:5 6}
+.hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer}
+#edges.hl .edge:not(.on):not(.sel) .vis{opacity:.07}
+.edge.sel .vis{opacity:1}
+.edge .eb{display:none}
+.edge.on .eb,.edge.sel .eb,.branch .eb{display:inline}
+.eb rect{fill:var(--surface);stroke:var(--tc);stroke-width:1.5}
+.eb text{font-family:var(--mono)!important;font-size:11px;font-weight:600;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.branch.sel .vis{stroke-width:7}
+.branch.sel .eb rect{fill:var(--tc)}
+.ring{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:2 5}
+.ringlabel{font-size:11px;fill:var(--ink-2);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.node{cursor:pointer;outline:none;touch-action:none}
+.node circle{fill:var(--g);stroke:var(--surface);stroke-width:3;transition:stroke .15s}
+.node .ncode{font-family:var(--mono)!important;font-size:12px;font-weight:600;fill:var(--gi);text-anchor:middle;dominant-baseline:central;letter-spacing:.03em;pointer-events:none}
+.node.center .ncode{font-size:14px}
+.node .nname{font-size:13px;font-weight:700;fill:var(--ink);text-anchor:middle;paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round;pointer-events:none}
+.node .ring2{fill:none;stroke:var(--ink);stroke-width:2;opacity:0}
+.node.sel .ring2,.node.hov .ring2,.node:focus-visible .ring2{opacity:1}
+.node:focus-visible .ring2{stroke:var(--accent)}
+.stage.dragging .node{cursor:grabbing}
+
+@media (max-width:880px){
+  html,body{height:auto}
+  body{display:block}
+  .app{display:flex;flex-direction:column}
+  .stage{order:-1;height:min(74vh,540px)}
+  .side{overflow:visible;padding-right:0}
+  .hint{display:none}
+}
+@media (max-width:420px){
+  .addrow{grid-template-columns:minmax(0,1fr) 96px}
+  .addrow .btn{grid-column:1 / -1}
+  .top h1{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>MBTI相性マップ</h1>
+  <p>メンバーのタイプを入れると、お互いの相性をマインドマップで可視化します</p>
+</header>
+
+<main class="app">
+  <aside class="side">
+    <section class="panel" aria-labelledby="membersTitle">
+      <h2 id="membersTitle">メンバー <span class="tag" id="countTag">0人</span></h2>
+      <div class="samplenote" id="sampleNote" hidden>
+        <span>サンプルのメンバーを表示しています</span>
+        <button class="btn ghost small" id="clearSample" type="button">サンプルを消す</button>
+      </div>
+      <form id="addForm" autocomplete="off">
+        <div class="addrow">
+          <input class="field" id="nameInput" maxlength="16" placeholder="名前" aria-label="名前">
+          <select class="field" id="typeInput" aria-label="MBTIタイプ"></select>
+          <button class="btn" type="submit">追加</button>
+        </div>
+        <div class="formmsg" id="formMsg" aria-live="polite"></div>
+      </form>
+      <details class="bulk">
+        <summary>まとめて貼り付けで追加</summary>
+        <textarea id="bulkInput" placeholder="1行に1人ずつ（例）&#10;たかし INTJ&#10;はなこ, ESFJ"></textarea>
+        <div class="row"><button class="btn ghost small" id="bulkAdd" type="button">読み込む</button></div>
+      </details>
+      <ul class="members" id="memberList"></ul>
+      <div class="memfoot" id="memFoot">
+        <span>名前をクリックでその人中心に表示</span>
+        <button class="btn ghost small" id="clearAll" type="button">すべて削除</button>
+      </div>
+    </section>
+
+    <section class="panel" id="detail" aria-live="polite"></section>
+
+    <p class="note">相性スコアはMBTIの4つの指標（E/I・N/S・T/F・J/P）の組み合わせから算出した目安です。性格タイプは人を決めつけるものではないので、話のきっかけとして使ってください。</p>
+  </aside>
+
+  <section class="stage" id="stage" aria-label="相性マップ">
+    <svg id="map" role="img" aria-label="メンバー同士の相性マップ">
+      <g id="rings"></g>
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </svg>
+    <div class="empty" id="emptyMsg" hidden></div>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
+    <div class="maphead">
+      <button class="btn ghost small" id="backBtn" type="button" hidden style="background:var(--surface)">← 全体マップ</button>
+      <div class="maptitle" id="mapTitle">全体マップ</div>
+      <span class="spacer"></span>
+      <button class="btn ghost small" id="relayoutBtn" type="button" style="background:var(--surface)">並べ直す</button>
+    </div>
+    <div class="mapfoot">
+      <div class="legend" id="legend" role="group" aria-label="表示する相性の種類"></div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- MBTI data ---------- */
+const TYPES = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
+const DESC = {
+  INTJ:'戦略家', INTP:'分析家', ENTJ:'統率者', ENTP:'発明家',
+  INFJ:'洞察者', INFP:'理想家', ENFJ:'教導者', ENFP:'情熱家',
+  ISTJ:'堅実家', ISFJ:'守護者', ESTJ:'管理者', ESFJ:'世話役',
+  ISTP:'職人',   ISFP:'芸術家', ESTP:'挑戦者', ESFP:'盛り上げ役'
+};
+const GROUPS = { nt:'NT 理論派', nf:'NF 理想派', sj:'SJ 堅実派', sp:'SP 行動派' };
+const FN_NAME = { Ne:'外向直観', Ni:'内向直観', Se:'外向感覚', Si:'内向感覚', Te:'外向思考', Ti:'内向思考', Fe:'外向感情', Fi:'内向感情' };
+const TIERS = [
+  { key:'t1', name:'最高',       min:88 },
+  { key:'t2', name:'良好',       min:75 },
+  { key:'t3', name:'ふつう',     min:58 },
+  { key:'t4', name:'要歩み寄り', min:0  }
+];
+const MIN_SCORE = 45, MAX_SCORE = 98;
+
+const groupOf = t => t[1] === 'N' ? (t[2] === 'T' ? 'nt' : 'nf') : (t[3] === 'J' ? 'sj' : 'sp');
+const tierOf = s => TIERS.find(x => s >= x.min);
+
+// 心理機能スタック（主・補助・第三・劣等）
+function stackOf(t) {
+  const opp = { N:'S', S:'N', T:'F', F:'T' };
+  const flip = a => a === 'e' ? 'i' : 'e';
+  const pf = t[1] + (t[3] === 'P' ? 'e' : 'i');
+  const jf = t[2] + (t[3] === 'J' ? 'e' : 'i');
+  const extraverted = t[0] === 'E';
+  const dom = (pf[1] === 'e') === extraverted ? pf : jf;
+  const aux = dom === pf ? jf : pf;
+  return [dom, aux, opp[aux[0]] + flip(aux[1]), opp[dom[0]] + flip(dom[1])];
+}
+
+// ツールチップ用のひと言（指標 i ごと）
+function shortOf(i, a, b) {
+  const x = a[i], y = b[i];
+  if (i === 0) return x !== y ? '話す役・聴く役に分かれてバランスがいい' : x === 'E' ? '話の主導権を取り合いがち' : '踏み込むきっかけが少なめ';
+  if (i === 1) return x === y ? (x === 'N' ? 'アイデアや可能性の話で盛り上がれる' : '具体的な段取りの話がすっと通じる') : '見ている景色が違い、話がすれ違いやすい';
+  if (i === 2) return x === y ? (x === 'T' ? '筋道立てた議論がスムーズ' : 'お互いの気持ちを汲み合える') : '言い方ひとつで誤解が生まれやすい';
+  return x !== y ? '段取りと臨機応変さを補い合える' : x === 'J' ? '進め方のこだわりがぶつかりやすい' : '決め事が後回しになりがち';
+}
+
+const compatCache = new Map();
+function compat(a, b) {
+  const key = a < b ? a + b : b + a;
+  if (compatCache.has(key)) return compatCache.get(key);
+  let s = 50;
+  const f = [];
+  // E/I
+  if (a[0] !== b[0]) { s += 10; f.push({ axis:'エネルギーの向き', i:0, d:10, text:'外向（E）と内向（I）。話す役と聴く役に自然と分かれて、バランスが取れます。' }); }
+  else if (a[0] === 'E') { s += 3; f.push({ axis:'エネルギーの向き', i:0, d:3, text:'どちらも外向（E）。テンポよく盛り上がる一方、話の主導権を取り合うことも。' }); }
+  else { s += 3; f.push({ axis:'エネルギーの向き', i:0, d:3, text:'どちらも内向（I）。静かに落ち着ける関係。ただ、踏み込むきっかけは少なめ。' }); }
+  // N/S
+  if (a[1] === b[1]) {
+    s += 20;
+    f.push({ axis:'ものの見方', i:1, d:20, text: a[1] === 'N'
+      ? 'どちらも直観型（N）。アイデアや可能性の話で盛り上がり、話が噛み合いやすい。'
+      : 'どちらも感覚型（S）。事実や具体的な段取りの話がスムーズに通じます。' });
+  } else {
+    s -= 10;
+    f.push({ axis:'ものの見方', i:1, d:-10, text:'直観（N）と感覚（S）で見ている景色が違います。すれ違いやすい反面、全体像と細部を分担できる組み合わせ。' });
+  }
+  // T/F
+  if (a[2] === b[2]) {
+    s += 8;
+    f.push({ axis:'判断のしかた', i:2, d:8, text: a[2] === 'T'
+      ? 'どちらも思考型（T）。筋道立てて話せば通じ、議論がスムーズ。'
+      : 'どちらも感情型（F）。気持ちを汲み合える温かい関係になりやすい。' });
+  } else {
+    s += 2;
+    f.push({ axis:'判断のしかた', i:2, d:2, text:'思考（T）と感情（F）。合理と共感の両面から考えられる一方、言い方ひとつで誤解が生まれやすい。' });
+  }
+  // J/P
+  if (a[3] !== b[3]) { s += 10; f.push({ axis:'物事の進め方', i:3, d:10, text:'計画型（J）と柔軟型（P）。段取りと臨機応変さを補い合えます。' }); }
+  else if (a[3] === 'J') { f.push({ axis:'物事の進め方', i:3, d:0, text:'どちらも計画型（J）。進め方へのこだわりがぶつかることがあります。' }); }
+  else { f.push({ axis:'物事の進め方', i:3, d:0, text:'どちらも柔軟型（P）。自由で楽しい反面、決め事が後回しになりがち。' }); }
+
+  f.forEach(x => { x.s = shortOf(x.i, a, b); x.good = x.d >= 8; });
+
+  let relation = null;
+  if (a === b) relation = { name:'ミラー', text:'同じタイプ同士。説明しなくても分かり合える反面、同じ弱点も抱えやすい関係です。' };
+  else if (a[1] === b[1] && a[0] !== b[0] && a[3] !== b[3]) relation = { name:'黄金ペア', text:'見ている世界（N/S）は同じで、エネルギーの向きと進め方が逆。自然と補い合える組み合わせです。' };
+  else if ([0,1,2,3].every(i => a[i] !== b[i])) relation = { name:'正反対', text:'4つの指標がすべて逆。刺激は大きいけれど、理解し合うまでに時間がかかる組み合わせです。' };
+
+  const sa = stackOf(a).slice(0, 2), sb = stackOf(b).slice(0, 2);
+  const shared = sa.filter(x => sb.includes(x));
+
+  const tips = [];
+  if (a[1] !== b[1]) tips.push('抽象的な話には具体例を、細かい話には「何のためか」を添えると伝わりやすくなります。');
+  if (a[2] !== b[2]) tips.push('結論の前に、理由や気持ちをひと言。「正しさ」と「納得感」の両方を大事に。');
+  if (a[3] === b[3] && a[3] === 'J') tips.push('どちらが決めるか、役割分担を先に決めておくと衝突が減ります。');
+  if (a[3] === b[3] && a[3] === 'P') tips.push('締め切りや決め事はカレンダーやタスク管理に任せて、外に出しておきましょう。');
+  if (a[0] === b[0] && a[0] === 'E') tips.push('話す時間を交互に。相手の話を最後まで聞く意識を持つとさらに良くなります。');
+  if (a[0] === b[0] && a[0] === 'I') tips.push('気になることは溜めずに、テキストでもいいので早めに共有を。');
+  if (!tips.length) tips.push('相性は抜群。なれ合いにならないよう、ときどき率直なフィードバックを交わしましょう。');
+
+  const res = { score:s, tier:tierOf(s), factors:f, relation, shared, tips };
+  compatCache.set(key, res);
+  return res;
+}
+
+/* ---------- state ---------- */
+const SAMPLE = [['さくら','INFJ'],['けんた','ENTP'],['ゆい','ISFJ'],['はると','ESTP'],['みお','ENFP'],['そうた','ISTJ'],['あおい','INTP']];
+const STORE_KEY = 'mbti-compat-map-v1';
+const MAX_MEMBERS = 20;
+
+let members = [];
+let nextId = 1;
+const state = { mode:'overview', focusId:null, pair:null, hover:null, hoverPair:null, hidden:new Set(), isSample:false };
+let pos = {}, overviewPos = {}, viewBox = { x:-300, y:-220, w:600, h:440 };
+let focusRadius = null;
+let anim = 0;
+
+const byId = id => members.find(m => m.id === id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ members, nextId, isSample:state.isSample })); } catch (e) {}
+}
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (!d || !Array.isArray(d.members)) return false;
+    members = d.members.filter(m => m && TYPES.includes(m.type) && Number.isInteger(m.id))
+      .map(m => ({ id:m.id, name:String(m.name || '').slice(0, 16) || '名無し', type:m.type }));
+    nextId = Math.max(d.nextId || 1, ...members.map(m => m.id + 1), 1);
+    state.isSample = !!d.isSample;
+    return true;
+  } catch (e) { return false; }
+}
+function loadSample() {
+  members = SAMPLE.map(([name, type], i) => ({ id:i + 1, name, type }));
+  nextId = members.length + 1;
+  state.isSample = true;
+}
+
+/* ---------- layouts ---------- */
+function allPairs() {
+  const out = [];
+  for (let i = 0; i < members.length; i++)
+    for (let j = i + 1; j < members.length; j++) {
+      const a = members[i], b = members[j];
+      out.push({ a, b, c:compat(a.type, b.type) });
+    }
+  return out;
+}
+
+// 相性が良いほど近くに寄る、ばねモデルの配置
+function forceLayout(seed) {
+  const n = members.length;
+  const P = members.map((m, i) => seed[m.id] ? { ...seed[m.id] } : {
+    x: Math.cos(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 37) % 11) - 5,
+    y: Math.sin(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 53) % 13) - 6
+  });
+  const S = members.map(a => members.map(b => compat(a.type, b.type).score));
+  const IT = 600;
+  for (let it = 0; it < IT; it++) {
+    const alpha = 1 - it / IT;
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+      let dx = P[j].x - P[i].x, dy = P[j].y - P[i].y;
+      let d = Math.hypot(dx, dy);
+      if (d < 0.01) { dx = 0.01 * (i - j); dy = 0.01; d = Math.hypot(dx, dy); }
+      const L = 125 + (MAX_SCORE - S[i][j]) * 4.4;
+      let f = (d - L) / d * 0.06 * alpha;
+      if (d < 105) f -= (105 - d) / d * 0.5;
+      P[i].x += dx * f; P[i].y += dy * f;
+      P[j].x -= dx * f; P[j].y -= dy * f;
+    }
+  }
+  const cx = P.reduce((s, p) => s + p.x, 0) / Math.max(n, 1);
+  const cy = P.reduce((s, p) => s + p.y, 0) / Math.max(n, 1);
+  const out = {};
+  members.forEach((m, i) => { out[m.id] = { x:P[i].x - cx, y:P[i].y - cy }; });
+  return out;
+}
+
+function fitVB(p) {
+  const pts = Object.values(p);
+  if (!pts.length) return { x:-300, y:-220, w:600, h:440 };
+  let x0 = Math.min(...pts.map(q => q.x)) - 80, x1 = Math.max(...pts.map(q => q.x)) + 80;
+  let y0 = Math.min(...pts.map(q => q.y)) - 90, y1 = Math.max(...pts.map(q => q.y)) + 100;
+  const w = Math.max(x1 - x0, 600), h = Math.max(y1 - y0, 440);
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  return { x:cx - w / 2, y:cy - h / 2, w, h };
+}
+
+function focusLayout(cid) {
+  const c = byId(cid);
+  const others = members.filter(m => m.id !== cid)
+    .map(m => ({ m, s:compat(c.type, m.type).score }))
+    .sort((p, q) => q.s - p.s || p.m.id - q.m.id);
+  const n = others.length;
+  const rmin = Math.max(135, n * 74 / (2 * Math.PI));
+  focusRadius = s => rmin + (MAX_SCORE - s) * 3.3;
+  const target = { [cid]:{ x:0, y:0 } };
+  others.forEach((o, i) => {
+    const ang = -Math.PI / 2 + (n <= 1 ? 0 : i * 2 * Math.PI / n);
+    const r = focusRadius(o.s);
+    target[o.m.id] = { x:Math.cos(ang) * r, y:Math.sin(ang) * r };
+  });
+  const ext = Math.max(focusRadius(MIN_SCORE), ...others.map(o => focusRadius(o.s))) + 75;
+  return { target, vb:{ x:-ext, y:-ext + 10, w:ext * 2, h:ext * 2 } };
+}
+
+/* ---------- SVG scene ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('map');
+const gRings = document.getElementById('rings');
+const gEdges = document.getElementById('edges');
+const gNodes = document.getElementById('nodes');
+const stage = document.getElementById('stage');
+let sceneEdges = [], sceneNodes = {};
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function makeBadge(parent, score) {
+  const g = el('g', { class:'eb' }, parent);
+  el('rect', { x:-17, y:-10, width:34, height:20, rx:10 }, g);
+  const t = el('text', {}, g); t.textContent = score;
+  return g;
+}
+
+function rebuildScene() {
+  gRings.replaceChildren(); gEdges.replaceChildren(); gNodes.replaceChildren();
+  sceneEdges = []; sceneNodes = {};
+  state.hover = null; state.hoverPair = null; hideTip();
+  if (state.mode === 'overview') {
+    for (const { a, b, c } of allPairs()) {
+      if (state.hidden.has(c.tier.key)) continue;
+      const g = el('g', { class:`edge ${c.tier.key}`, 'data-a':a.id, 'data-b':b.id }, gEdges);
+      const w = 1.2 + (c.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5;
+      const vis = el('line', { class:'vis', 'stroke-width':w.toFixed(2) }, g);
+      const hit = el('line', { class:'hit' }, g);
+      const badge = makeBadge(g, c.score);
+      sceneEdges.push({ a:a.id, b:b.id, g, vis, hit, badge, kind:'line' });
+    }
+  } else {
+    const c = byId(state.focusId);
+    for (const t of TIERS.slice(0, 3)) {
+      const r = focusRadius(t.min);
+      el('circle', { class:'ring', r, cx:0, cy:0 }, gRings);
+      const lbl = el('text', { class:'ringlabel', x:-r + 6, y:-6 }, gRings);
+      lbl.textContent = `${t.min}+ ${t.name}`;
+    }
+    members.filter(m => m.id !== c.id).forEach((m, i) => {
+      const cc = compat(c.type, m.type);
+      if (state.hidden.has(cc.tier.key)) return;
+      const g = el('g', { class:`edge branch ${cc.tier.key}`, 'data-a':c.id, 'data-b':m.id }, gEdges);
+      const w = 2 + (cc.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5;
+      const vis = el('path', { class:'vis', 'stroke-width':w.toFixed(2) }, g);
+      const hit = el('path', { class:'hit' }, g);
+      const badge = makeBadge(g, cc.score);
+      sceneEdges.push({ a:c.id, b:m.id, g, vis, hit, badge, kind:'curve' });
+    });
+  }
+  for (const m of members) {
+    const isCenter = state.mode === 'focus' && m.id === state.focusId;
+    const r = state.mode === 'overview' ? 30 : (isCenter ? 42 : 28);
+    const g = el('g', {
+      class:`node g-${groupOf(m.type)}${isCenter ? ' center' : ''}`, 'data-id':m.id,
+      tabindex:0, role:'button', 'aria-label':`${m.name}（${m.type}）`
+    }, gNodes);
+    el('circle', { class:'ring2', r:r + 6 }, g);
+    el('circle', { r }, g);
+    const code = el('text', { class:'ncode', y:0 }, g); code.textContent = m.type;
+    const nm = el('text', { class:'nname', y:r + 18 }, g); nm.textContent = m.name;
+    sceneNodes[m.id] = g;
+  }
+  applyHighlight();
+}
+
+function updatePositions() {
+  svg.setAttribute('viewBox', `${viewBox.x.toFixed(1)} ${viewBox.y.toFixed(1)} ${viewBox.w.toFixed(1)} ${viewBox.h.toFixed(1)}`);
+  for (const id in sceneNodes) {
+    const p = pos[id]; if (!p) continue;
+    sceneNodes[id].setAttribute('transform', `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`);
+  }
+  for (const e of sceneEdges) {
+    const p = pos[e.a], q = pos[e.b]; if (!p || !q) continue;
+    if (e.kind === 'line') {
+      for (const l of [e.vis, e.hit]) { l.setAttribute('x1', p.x); l.setAttribute('y1', p.y); l.setAttribute('x2', q.x); l.setAttribute('y2', q.y); }
+      e.badge.setAttribute('transform', `translate(${(p.x + q.x) / 2},${(p.y + q.y) / 2})`);
+    } else {
+      const dx = q.x - p.x, dy = q.y - p.y, len = Math.hypot(dx, dy) || 1;
+      const cx = (p.x + q.x) / 2 - dy / len * len * 0.16, cy = (p.y + q.y) / 2 + dx / len * len * 0.16;
+      const d = `M${p.x.toFixed(1)},${p.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${q.x.toFixed(1)},${q.y.toFixed(1)}`;
+      e.vis.setAttribute('d', d); e.hit.setAttribute('d', d);
+      const t = 0.56, u = 1 - t;
+      const bx = u * u * p.x + 2 * u * t * cx + t * t * q.x, by = u * u * p.y + 2 * u * t * cy + t * t * q.y;
+      e.badge.setAttribute('transform', `translate(${bx.toFixed(1)},${by.toFixed(1)})`);
+    }
+  }
+}
+
+const pairKeyOf = (a, b) => a < b ? `${a}-${b}` : `${b}-${a}`;
+
+function applyHighlight() {
+  const pairKey = state.pair ? pairKeyOf(state.pair[0], state.pair[1]) : null;
+  const hov = state.hover, hovPair = state.hoverPair;
+  const hovDims = hov != null && !(state.mode === 'focus' && hov === state.focusId);
+  gEdges.classList.toggle('hl', hovDims || hovPair != null || (state.mode === 'overview' && pairKey != null));
+  for (const e of sceneEdges) {
+    const k = pairKeyOf(e.a, e.b);
+    e.g.classList.toggle('sel', k === pairKey);
+    e.g.classList.toggle('on', (hov != null && (e.a === hov || e.b === hov)) || k === hovPair);
+  }
+  for (const id in sceneNodes) {
+    const n = +id;
+    const sel = (state.pair && state.pair.includes(n)) || (state.mode === 'focus' && !state.pair && n === state.focusId);
+    sceneNodes[id].classList.toggle('sel', !!sel);
+    sceneNodes[id].classList.toggle('hov', n === hov);
+  }
+}
+
+function animateTo(target, vb, instant) {
+  cancelAnimationFrame(anim);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const from = {};
+  for (const m of members) from[m.id] = pos[m.id] ? { ...pos[m.id] } : { ...target[m.id] };
+  const fromVB = { ...viewBox };
+  if (instant || reduce) {
+    pos = {}; for (const m of members) pos[m.id] = { ...target[m.id] };
+    viewBox = { ...vb }; updatePositions(); return;
+  }
+  const t0 = performance.now(), D = 520;
+  const step = now => {
+    const t = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - t, 3);
+    const next = {};
+    for (const m of members) {
+      const a = from[m.id], b = target[m.id];
+      next[m.id] = { x:a.x + (b.x - a.x) * e, y:a.y + (b.y - a.y) * e };
+    }
+    pos = next;
+    viewBox = { x:fromVB.x + (vb.x - fromVB.x) * e, y:fromVB.y + (vb.y - fromVB.y) * e, w:fromVB.w + (vb.w - fromVB.w) * e, h:fromVB.h + (vb.h - fromVB.h) * e };
+    updatePositions();
+    if (t < 1) anim = requestAnimationFrame(step);
+  };
+  anim = requestAnimationFrame(step);
+}
+
+/* ---------- map chrome ---------- */
+const mapTitle = document.getElementById('mapTitle');
+const backBtn = document.getElementById('backBtn');
+const relayoutBtn = document.getElementById('relayoutBtn');
+const legend = document.getElementById('legend');
+const hint = document.getElementById('hint');
+const emptyMsg = document.getElementById('emptyMsg');
+
+function renderChrome() {
+  const focus = state.mode === 'focus';
+  const c = focus ? byId(state.focusId) : null;
+  mapTitle.textContent = focus ? `${c.name}（${c.type}）から見た相性` : '全体マップ';
+  backBtn.hidden = !focus;
+  relayoutBtn.hidden = focus || members.length < 3;
+  hint.textContent = focus
+    ? '中心に近いほど相性◎ ／ マウスを乗せると相性の中身 ／ Escで全体へ'
+    : '線や丸にマウスを乗せると相性の中身 ／ 丸をクリックでその人中心 ／ ドラッグで移動';
+
+  const counts = { t1:0, t2:0, t3:0, t4:0 };
+  if (focus) members.forEach(m => { if (m.id !== c.id) counts[compat(c.type, m.type).tier.key]++; });
+  else allPairs().forEach(p => counts[p.c.tier.key]++);
+  legend.innerHTML = TIERS.map(t =>
+    `<button type="button" class="chip ${t.key}" data-tier="${t.key}" aria-pressed="${!state.hidden.has(t.key)}"><span class="sw"></span>${t.name}<span class="c">${counts[t.key]}</span></button>`
+  ).join('');
+
+  emptyMsg.hidden = members.length >= 2;
+  emptyMsg.textContent = members.length === 0
+    ? 'メンバーを2人以上追加すると、相性マップが表示されます'
+    : '';
+  if (members.length === 1) { emptyMsg.hidden = false; emptyMsg.style.alignItems = 'flex-end'; emptyMsg.style.paddingBottom = '72px'; emptyMsg.textContent = 'もう1人追加すると相性が表示されます'; }
+  else { emptyMsg.style.alignItems = ''; emptyMsg.style.paddingBottom = ''; }
+}
+
+/* ---------- side panels ---------- */
+const memberList = document.getElementById('memberList');
+const detail = document.getElementById('detail');
+const typeInput = document.getElementById('typeInput');
+
+function typeOptions(selected) {
+  return ['nt','nf','sj','sp'].map(g =>
+    `<optgroup label="${GROUPS[g]}">` +
+    TYPES.filter(t => groupOf(t) === g).map(t => `<option value="${t}"${t === selected ? ' selected' : ''}>${t}</option>`).join('') +
+    '</optgroup>').join('');
+}
+typeInput.innerHTML = '<option value="">タイプ</option>' + ['nt','nf','sj','sp'].map(g =>
+  `<optgroup label="${GROUPS[g]}">` + TYPES.filter(t => groupOf(t) === g).map(t => `<option value="${t}">${t} ${DESC[t]}</option>`).join('') + '</optgroup>').join('');
+
+function renderMembers() {
+  document.getElementById('countTag').textContent = `${members.length}人`;
+  document.getElementById('sampleNote').hidden = !state.isSample || !members.length;
+  document.getElementById('memFoot').hidden = !members.length;
+  memberList.innerHTML = members.map(m => `
+    <li class="mem">
+      <span class="dot g-${groupOf(m.type)}"></span>
+      <button type="button" class="mname" data-focus="${m.id}" title="${esc(m.name)}を中心に表示">${esc(m.name)}</button>
+      <select id="type-${m.id}" data-type="${m.id}" aria-label="${esc(m.name)}のタイプ">${typeOptions(m.type)}</select>
+      <button type="button" class="x" data-del="${m.id}" aria-label="${esc(m.name)}を削除">×</button>
+    </li>`).join('');
+}
+
+const personChip = m => `<span class="dot g-${groupOf(m.type)}"></span><span class="t">${esc(m.name)}</span><span class="code">${m.type}</span>`;
+
+function pairRow(a, b, c) {
+  return `<li><button type="button" class="rowbtn" data-pair="${a.id},${b.id}">
+    <span class="who2">${personChip(a)}<span class="code">×</span>${personChip(b)}</span>
+    <span class="bar ${c.tier.key}"><i style="width:${c.score}%"></i></span>
+    <span class="num">${c.score}</span></button></li>`;
+}
+
+function renderTeam() {
+  if (members.length < 2) {
+    detail.innerHTML = `<h2>チームの概要</h2><p class="muted">2人以上そろうと、ベストな組み合わせやタイプの分布がここに表示されます。</p>`;
+    return;
+  }
+  const pairs = allPairs();
+  const avg = Math.round(pairs.reduce((s, p) => s + p.c.score, 0) / pairs.length);
+  const sorted = pairs.slice().sort((p, q) => q.c.score - p.c.score);
+  const k = Math.min(3, Math.floor(pairs.length / 2) || 1);
+  const best = sorted.slice(0, k);
+  const worst = pairs.length > 1 ? sorted.slice(-k).reverse() : [];
+  const cnt = i => members.filter(m => m.type[i] === 'EINSTFJP'[i * 2]).length;
+  const axes = [['E','I',0],['N','S',1],['T','F',2],['J','P',3]];
+  const n = members.length;
+  const groups = { nt:0, nf:0, sj:0, sp:0 };
+  members.forEach(m => groups[groupOf(m.type)]++);
+  detail.innerHTML = `
+    <h2>チームの概要</h2>
+    <div class="stats">
+      <div class="stat"><b>${pairs.length}</b><span>組み合わせ</span></div>
+      <div class="stat"><b>${avg}</b><span>平均相性スコア · ${tierOf(avg).name}</span></div>
+    </div>
+    <h3>相性ベスト</h3>
+    <ul class="rank">${best.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>
+    ${worst.length ? `<h3>歩み寄りが大事な組み合わせ</h3><ul class="rank">${worst.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>` : ''}
+    <h3>4つの指標の分布</h3>
+    <div class="dist">${axes.map(([l, r, i]) => {
+      const c = cnt(i);
+      return `<div class="drow"><span>${l} ${c}</span><span class="split" role="img" aria-label="${l} ${c}人、${r} ${n - c}人"><i style="width:${c / n * 100}%"></i><i style="width:${(n - c) / n * 100}%"></i></span><span class="r">${n - c} ${r}</span></div>`;
+    }).join('')}</div>
+    <div class="groups">${Object.keys(groups).map(g => `<span><span class="dot g-${g}"></span>${GROUPS[g]} ${groups[g]}</span>`).join('')}</div>`;
+}
+
+function renderMember(id) {
+  const m = byId(id);
+  const st = stackOf(m.type);
+  const ranks = members.filter(o => o.id !== id).map(o => ({ o, c:compat(m.type, o.type) }))
+    .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
+  const labels = ['主機能','補助','第三','劣等'];
+  detail.innerHTML = `
+    <button type="button" class="backlink" data-act="overview">← チーム全体へ</button>
+    <div class="who g-${groupOf(m.type)}">
+      <span class="badge-type">${m.type}</span>
+      <div><div class="nm">${esc(m.name)}</div><div class="sub">${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}</div></div>
+    </div>
+    <div class="fns">${st.map((f, i) => `<div class="fn"><small>${labels[i]}</small><b>${f}</b><span>${FN_NAME[f]}</span></div>`).join('')}</div>
+    <h3>相性ランキング</h3>
+    <ul class="rank">${ranks.map(({ o, c }) => `<li><button type="button" class="rowbtn" data-pair="${m.id},${o.id}">
+      <span class="who2">${personChip(o)}</span>
+      <span class="bar ${c.tier.key}"><i style="width:${c.score}%"></i></span>
+      <span class="num">${c.score}</span></button></li>`).join('') || '<li class="muted">ほかのメンバーを追加してください</li>'}</ul>`;
+}
+
+function renderPair(aId, bId) {
+  const a = byId(aId), b = byId(bId);
+  const c = compat(a.type, b.type);
+  const back = state.mode === 'focus' ? `${esc(byId(state.focusId).name)}の相性一覧へ` : 'チーム全体へ';
+  detail.innerHTML = `
+    <button type="button" class="backlink" data-act="unpair">← ${back}</button>
+    <div class="pairhead">
+      <span class="p">${personChip(a)}</span><span class="times">×</span><span class="p">${personChip(b)}</span>
+    </div>
+    <div class="scorebox">
+      <div class="big">${c.score}<small> /100</small></div>
+      <div class="meta"><span class="tier ${c.tier.key}">${c.tier.name}</span>${c.relation ? `<span><span class="rel">${c.relation.name}</span></span>` : ''}</div>
+    </div>
+    ${c.relation ? `<p class="reltext">${c.relation.text}</p>` : ''}
+    <h3>4つの指標で見ると</h3>
+    <ul class="axes">${c.factors.map(f => `<li class="axis">
+      <span class="an">${f.axis}</span>
+      <span class="ab">${a.type[f.i]} · ${b.type[f.i]}</span>
+      <span class="dv ${f.d > 0 ? 'plus' : f.d < 0 ? 'minus' : ''}">${f.d > 0 ? '+' : ''}${f.d}</span>
+      <p>${f.text}</p></li>`).join('')}</ul>
+    ${c.shared.length ? `<h3>共通の得意な心理機能</h3><p class="muted">${c.shared.map(f => `<b class="code" style="color:var(--ink)">${f}</b> ${FN_NAME[f]}`).join('、')}。考え方の「クセ」が似ているので、説明なしで通じる場面が多いはず。</p>` : ''}
+    <h3>うまくいくコツ</h3>
+    <ul class="tips">${c.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+    <div class="actions">
+      ${state.focusId !== a.id ? `<button type="button" class="btn ghost small" data-focus="${a.id}">${esc(a.name)}を中心に表示</button>` : ''}
+      ${state.focusId !== b.id ? `<button type="button" class="btn ghost small" data-focus="${b.id}">${esc(b.name)}を中心に表示</button>` : ''}
+    </div>`;
+}
+
+function renderPanel() {
+  if (state.pair) renderPair(state.pair[0], state.pair[1]);
+  else if (state.mode === 'focus') renderMember(state.focusId);
+  else renderTeam();
+}
+
+/* ---------- actions ---------- */
+function focusOn(id) {
+  if (!byId(id)) return;
+  if (members.length < 2) { state.pair = null; renderPanel(); return; }
+  state.mode = 'focus'; state.focusId = id; state.pair = null; state.hover = null;
+  const { target, vb } = focusLayout(id);
+  rebuildScene(); updatePositions();
+  animateTo(target, vb);
+  renderChrome(); renderPanel();
+}
+function toOverview() {
+  state.mode = 'overview'; state.focusId = null; state.pair = null; state.hover = null;
+  rebuildScene(); updatePositions();
+  animateTo(overviewPos, fitVB(overviewPos));
+  renderChrome(); renderPanel();
+}
+function selectPair(a, b) {
+  state.pair = [a, b];
+  applyHighlight(); renderPanel();
+}
+function clearPair() {
+  state.pair = null; applyHighlight(); renderPanel();
+}
+
+function refresh(instant) {
+  if (state.focusId != null && !byId(state.focusId)) { state.mode = 'overview'; state.focusId = null; }
+  if (state.mode === 'focus' && members.length < 2) { state.mode = 'overview'; state.focusId = null; }
+  if (state.pair && !(byId(state.pair[0]) && byId(state.pair[1]))) state.pair = null;
+  overviewPos = forceLayout(overviewPos);
+  let target, vb;
+  if (state.mode === 'focus') ({ target, vb } = focusLayout(state.focusId));
+  else { target = overviewPos; vb = fitVB(overviewPos); }
+  rebuildScene(); updatePositions();
+  animateTo(target, vb, instant);
+  renderMembers(); renderChrome(); renderPanel(); save();
+}
+
+function addMember(name, type) {
+  if (members.length >= MAX_MEMBERS) return false;
+  members.push({ id:nextId++, name:(name || '').trim().slice(0, 16) || `メンバー${members.length + 1}`, type });
+  return true;
+}
+
+const formMsg = document.getElementById('formMsg');
+function say(msg, err) { formMsg.textContent = msg; formMsg.classList.toggle('err', !!err); }
+
+document.getElementById('addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const nameEl = document.getElementById('nameInput');
+  const type = typeInput.value;
+  if (!type) { say('タイプを選んでください', true); typeInput.focus(); return; }
+  if (members.length >= MAX_MEMBERS) { say(`登録できるのは${MAX_MEMBERS}人までです`, true); return; }
+  addMember(nameEl.value, type);
+  state.isSample = false;
+  say(`${members[members.length - 1].name}（${type}）を追加しました`);
+  nameEl.value = ''; nameEl.focus();
+  refresh();
+});
+
+document.getElementById('bulkAdd').addEventListener('click', () => {
+  const ta = document.getElementById('bulkInput');
+  const lines = ta.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  let added = 0, bad = 0, full = 0;
+  for (const line of lines) {
+    const m = line.toUpperCase().match(/\b([EI][NS][TF][JP])(?:-[AT])?\b/);
+    if (!m) { bad++; continue; }
+    const name = line.replace(new RegExp(m[0].replace('-', '\\-'), 'i'), '').replace(/[,、，:：\t|]/g, ' ').trim();
+    if (!addMember(name, m[1])) { full++; continue; }
+    added++;
+  }
+  if (!added) { say(lines.length ? '読み取れる行がありませんでした。「名前 INFJ」の形で入力してください' : '貼り付け欄が空です', true); return; }
+  state.isSample = false;
+  ta.value = '';
+  say(`${added}人を追加しました` + (bad ? `（${bad}行は読み取れませんでした）` : '') + (full ? `（上限のため${full}人は追加できませんでした）` : ''), !!(bad || full));
+  refresh();
+});
+
+document.getElementById('clearSample').addEventListener('click', () => {
+  members = []; nextId = 1; state.isSample = false; overviewPos = {};
+  say('サンプルを消しました。メンバーを追加してください');
+  refresh(true);
+  document.getElementById('nameInput').focus();
+});
+
+const clearAllBtn = document.getElementById('clearAll');
+let armTimer = 0;
+clearAllBtn.addEventListener('click', () => {
+  if (clearAllBtn.dataset.armed !== '1') {
+    clearAllBtn.dataset.armed = '1'; clearAllBtn.textContent = 'もう一度押すと全員削除';
+    clearTimeout(armTimer);
+    armTimer = setTimeout(() => { clearAllBtn.dataset.armed = ''; clearAllBtn.textContent = 'すべて削除'; }, 3000);
+    return;
+  }
+  clearTimeout(armTimer);
+  clearAllBtn.dataset.armed = ''; clearAllBtn.textContent = 'すべて削除';
+  members = []; nextId = 1; state.isSample = false; overviewPos = {};
+  say('全員削除しました');
+  refresh(true);
+});
+
+memberList.addEventListener('change', e => {
+  const id = +e.target.dataset.type; if (!id) return;
+  const m = byId(id); if (!m) return;
+  m.type = e.target.value; state.isSample = false;
+  refresh();
+});
+
+// パネル内のボタン（委譲）
+document.querySelector('.side').addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.del) {
+    const id = +t.dataset.del;
+    members = members.filter(m => m.id !== id); delete overviewPos[id];
+    state.isSample = false; refresh(); return;
+  }
+  if (t.dataset.focus) { focusOn(+t.dataset.focus); return; }
+  if (t.dataset.pair) { const [a, b] = t.dataset.pair.split(',').map(Number); selectPair(a, b); return; }
+  if (t.dataset.act === 'overview') { toOverview(); return; }
+  if (t.dataset.act === 'unpair') { clearPair(); return; }
+});
+
+backBtn.addEventListener('click', toOverview);
+relayoutBtn.addEventListener('click', () => {
+  overviewPos = forceLayout({});
+  animateTo(overviewPos, fitVB(overviewPos));
+});
+legend.addEventListener('click', e => {
+  const t = e.target.closest('[data-tier]'); if (!t) return;
+  const k = t.dataset.tier;
+  state.hidden.has(k) ? state.hidden.delete(k) : state.hidden.add(k);
+  rebuildScene(); updatePositions(); renderChrome();
+});
+
+/* ---------- map interaction ---------- */
+let drag = null, suppressClick = false;
+function toSvg(e) {
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function nodeClick(id) {
+  if (state.mode === 'overview') { focusOn(id); return; }
+  if (id === state.focusId) clearPair(); else selectPair(state.focusId, id);
+}
+function setHover(id, pairKey = null) {
+  if (state.hover === id && state.hoverPair === pairKey) return;
+  state.hover = id; state.hoverPair = pairKey; applyHighlight();
+}
+
+/* ---------- hover tooltip ---------- */
+const tip = document.getElementById('tip');
+let tipKey = null;
+
+function pairTipHTML(a, b) {
+  const c = compat(a.type, b.type);
+  const good = c.factors.filter(f => f.good), bad = c.factors.filter(f => !f.good);
+  const li = f => `<li><span class="ab">${a.type[f.i]}·${b.type[f.i]}</span><span>${f.s}</span></li>`;
+  return `
+    <div class="th">${personChip(a)}<span class="code">×</span>${personChip(b)}</div>
+    <div class="ts"><b>${c.score}</b><span class="tier ${c.tier.key}">${c.tier.name}</span>${c.relation ? `<span class="rel">${c.relation.name}</span>` : ''}</div>
+    <h4 class="good">相性がいいところ</h4>
+    <ul class="fl">${good.length ? good.map(li).join('') : '<li><span class="ab">—</span><span>目立った強みは少なめ。お互いを知る時間を多めに</span></li>'}</ul>
+    <h4 class="bad">ぶつかりやすいところ</h4>
+    <ul class="fl">${bad.length ? bad.map(li).join('') : '<li><span class="ab">—</span><span>目立った弱点なし</span></li>'}</ul>
+    <h4>気をつけること</h4>
+    <ul class="tt">${c.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+    <div class="tf">クリックで詳しい解説をパネルに表示</div>`;
+}
+
+function memberTipHTML(m) {
+  const r = members.filter(o => o.id !== m.id).map(o => ({ o, c:compat(m.type, o.type) }))
+    .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
+  const row = ({ o, c }) => `<li class="mp">${personChip(o)}<span class="num">${c.score}</span><span class="tier ${c.tier.key}">${c.tier.name}</span></li>`;
+  const best = r.filter(x => x.c.score === r[0].c.score).slice(0, 3);
+  const last = r[r.length - 1];
+  const worst = r.length > 1 && last.c.score < r[0].c.score ? r.filter(x => x.c.score === last.c.score).slice(0, 3) : [];
+  return `
+    <div class="th">${personChip(m)}</div>
+    <div class="sub">${DESC[m.type]} · ${GROUPS[groupOf(m.type)]} · 主機能 ${stackOf(m.type)[0]}（${FN_NAME[stackOf(m.type)[0]]}）</div>
+    <h4 class="good">いちばん相性がいい</h4><ul>${best.map(row).join('')}</ul>
+    ${worst.length ? `<h4 class="bad">歩み寄りが大事</h4><ul>${worst.map(row).join('')}</ul>` : ''}
+    <div class="tf">クリックでこの人を中心にしたマップへ ／ 線に乗せるとペアの詳細</div>`;
+}
+
+function showTip(key, build, x, y) {
+  if (tipKey !== key) { tip.innerHTML = build(); tipKey = key; }
+  tip.hidden = false;
+  const sr = stage.getBoundingClientRect();
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let left = x - sr.left + 18, top = y - sr.top + 14;
+  if (left + tw > sr.width - 8) left = x - sr.left - tw - 18;
+  left = Math.max(8, Math.min(left, sr.width - tw - 8));
+  if (top + th > sr.height - 8) top = Math.max(8, sr.height - th - 8);
+  tip.style.transform = `translate(${Math.round(left)}px,${Math.round(top)}px)`;
+}
+function hideTip() { tip.hidden = true; tipKey = null; }
+
+// ポインタ（またはキーボードフォーカス）の対象に応じてハイライトとツールチップを更新
+function hoverAt(target, x, y) {
+  const n = target.closest && target.closest('.node');
+  const ed = target.closest && target.closest('.edge');
+  if (state.mode === 'overview') {
+    if (n) {
+      const m = byId(+n.dataset.id);
+      setHover(m.id);
+      if (members.length >= 2) showTip('m' + m.id, () => memberTipHTML(m), x, y); else hideTip();
+    } else if (ed) {
+      const a = byId(+ed.dataset.a), b = byId(+ed.dataset.b);
+      setHover(null, pairKeyOf(a.id, b.id));
+      showTip('p' + pairKeyOf(a.id, b.id), () => pairTipHTML(a, b), x, y);
+    } else { setHover(null); hideTip(); }
+    return;
+  }
+  const id = n ? +n.dataset.id : ed ? +ed.dataset.b : null;
+  if (id != null && id !== state.focusId) {
+    const a = byId(state.focusId), b = byId(id);
+    setHover(id);
+    showTip('p' + pairKeyOf(a.id, b.id), () => pairTipHTML(a, b), x, y);
+  } else { setHover(id); hideTip(); }
+}
+
+svg.addEventListener('pointerdown', e => {
+  const n = e.target.closest('.node');
+  if (n && state.mode === 'overview' && e.button === 0) drag = { id:+n.dataset.id, sx:e.clientX, sy:e.clientY, moved:false, pid:e.pointerId };
+});
+svg.addEventListener('pointermove', e => {
+  if (drag) {
+    if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 5) {
+      drag.moved = true; cancelAnimationFrame(anim);
+      try { svg.setPointerCapture(drag.pid); } catch (err) {}
+      stage.classList.add('dragging');
+      hideTip();
+    }
+    if (drag.moved) {
+      const p = toSvg(e);
+      const x = Math.min(viewBox.x + viewBox.w - 40, Math.max(viewBox.x + 40, p.x));
+      const y = Math.min(viewBox.y + viewBox.h - 50, Math.max(viewBox.y + 40, p.y));
+      pos[drag.id] = { x, y }; overviewPos[drag.id] = { x, y };
+      updatePositions();
+    }
+    return;
+  }
+  if (e.pointerType !== 'mouse') return;
+  hoverAt(e.target, e.clientX, e.clientY);
+});
+const endDrag = () => {
+  if (drag && drag.moved) { suppressClick = true; stage.classList.remove('dragging'); }
+  drag = null;
+};
+svg.addEventListener('pointerup', endDrag);
+svg.addEventListener('pointercancel', endDrag);
+svg.addEventListener('pointerleave', () => { if (!drag) { setHover(null); hideTip(); } });
+
+svg.addEventListener('click', e => {
+  if (suppressClick) { suppressClick = false; return; }
+  hideTip();
+  const n = e.target.closest('.node');
+  if (n) { nodeClick(+n.dataset.id); return; }
+  const ed = e.target.closest('.edge');
+  if (ed) { selectPair(+ed.dataset.a, +ed.dataset.b); return; }
+  if (state.pair) clearPair();
+});
+svg.addEventListener('keydown', e => {
+  const n = e.target.closest('.node');
+  if (n && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); nodeClick(+n.dataset.id); }
+});
+svg.addEventListener('focusin', e => {
+  const n = e.target.closest('.node'); if (!n) return;
+  const r = n.getBoundingClientRect();
+  hoverAt(n, r.right, r.top);
+});
+svg.addEventListener('focusout', () => { setHover(null); hideTip(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+  if (state.pair) clearPair(); else if (state.mode === 'focus') toOverview();
+});
+
+/* ---------- boot ---------- */
+if (!load() || (!members.length && !state.isSample)) { if (!members.length) loadSample(); }
+refresh(true);
+})();
+</script>
+</body>
+</html>
