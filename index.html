@@ -99,16 +99,13 @@ details.bulk .row{display:flex;justify-content:flex-end;margin-top:6px}
 .g-nt{--g:var(--nt);--gi:var(--on-nt)} .g-nf{--g:var(--nf);--gi:var(--on-nf)}
 .g-sj{--g:var(--sj);--gi:var(--on-sj)} .g-sp{--g:var(--sp);--gi:var(--on-sp)}
 
-/* タイプごとの16色。NT=紫系、NF=緑系、SJ=青系、SP=橙系 */
-.ty-INTJ{--c:#4F55C9} .ty-INTP{--c:#7457C9} .ty-ENTJ{--c:#9443B5} .ty-ENTP{--c:#B8418F}
-.ty-INFJ{--c:#1E8A66} .ty-INFP{--c:#4A8F2A} .ty-ENFJ{--c:#138A94} .ty-ENFP{--c:#7E9416}
-.ty-ISTJ{--c:#2B5DA8} .ty-ISFJ{--c:#4D8BD6} .ty-ESTJ{--c:#1D4E7A} .ty-ESFJ{--c:#5B9FC7}
-.ty-ISTP{--c:#7F5A40} .ty-ISFP{--c:#B8732E} .ty-ESTP{--c:#D2502F} .ty-ESFP{--c:#E3A11B;--ci:#2B2105}
+/* タイプごとの16色。どの2色も色差ΔE（CIE76）27以上になるよう、色相と明るさの両方をずらしている。
+   NT=藍〜桃、NF=黄緑〜青緑、SJ=水色〜紺、SP=赤〜山吹。両テーマ共通で、明るい色だけアイコンを暗色に */
+.ty-INTJ{--c:#4B4FD8} .ty-INTP{--c:#B28CF2;--ci:#10140F} .ty-ENTJ{--c:#8A2BA0} .ty-ENTP{--c:#E0529F}
+.ty-INFJ{--c:#0F7A4E} .ty-INFP{--c:#4FA83C} .ty-ENFJ{--c:#22B3A0;--ci:#10140F} .ty-ENFP{--c:#B5CC2A;--ci:#10140F}
+.ty-ISTJ{--c:#2B52A8} .ty-ISFJ{--c:#3BA2E6;--ci:#10140F} .ty-ESTJ{--c:#6B7F9E} .ty-ESFJ{--c:#7ADDEB;--ci:#10140F}
+.ty-ISTP{--c:#8A5A3A} .ty-ISFP{--c:#EE8A2E;--ci:#10140F} .ty-ESTP{--c:#D93A32} .ty-ESFP{--c:#F2C624;--ci:#10140F}
 .tyc{--g:var(--c);--gi:var(--ci,#FFFFFF)}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .tyc{--g:color-mix(in oklab,var(--c) 74%,#FFFFFF);--gi:#0F1411}
-}
-:root[data-theme="dark"] .tyc{--g:color-mix(in oklab,var(--c) 74%,#FFFFFF);--gi:#0F1411}
 .mname{width:100%;min-width:0;height:30px;background:transparent;border:1px solid transparent;border-radius:8px;padding:0 6px;margin-left:-6px;font-weight:500;text-overflow:ellipsis}
 .mname:hover{border-color:var(--line)}
 .mname:focus{border-color:var(--accent);background:var(--surface);outline:none}
