@@ -255,9 +255,12 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
 .edge .vis{fill:none;stroke:var(--tc);stroke-linecap:round;transition:opacity .2s}
 .edge.t3 .vis{opacity:.5}
 /* 人数が多いときは「ふつう」の線をさらに薄く、文字を小さくして見通しを保つ */
-#map[data-dense="1"] .edge.t3 .vis{opacity:.28}
-#map[data-dense="2"] .edge.t3 .vis{opacity:.16}
-#map[data-dense="2"] .edge.t4 .vis{opacity:.6}
+#map[data-dense="1"] .edge.t1 .vis{opacity:.75}
+#map[data-dense="1"] .edge.t2 .vis,#map[data-dense="1"] .edge.t4 .vis{opacity:.6}
+#map[data-dense="1"] .edge.t3 .vis{opacity:.25}
+#map[data-dense="2"] .edge.t1 .vis{opacity:.42}
+#map[data-dense="2"] .edge.t2 .vis,#map[data-dense="2"] .edge.t4 .vis{opacity:.32}
+#map[data-dense="2"] .edge.t3 .vis{opacity:.12}
 #map[data-dense="1"] .node .nname{font-size:12px}
 #map[data-dense="2"] .node .nname{font-size:11px}
 #map[data-dense="2"] .node .ncode{font-size:9.5px}
@@ -616,7 +619,7 @@ const density = () => members.length > 24 ? 2 : members.length > 14 ? 1 : 0;
 const SIZES = [
   { r:30, center:42, other:28, collide:128, spacing:74, edge:1,   label:18 },
   { r:25, center:37, other:23, collide:116, spacing:66, edge:.75, label:16 },
-  { r:21, center:33, other:19, collide:104, spacing:58, edge:.55, label:15 }
+  { r:21, center:33, other:19, collide:104, spacing:58, edge:.42, label:15 }
 ];
 
 let members = [];
