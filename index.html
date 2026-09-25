@@ -719,15 +719,18 @@ function focusLayout(cid) {
     .sort((p, q) => q.s - p.s || p.m.id - q.m.id);
   const n = others.length;
   const sz = SIZES[density()];
-  const rmin = Math.max(135, n * sz.spacing / (2 * Math.PI));
-  focusRadius = s => rmin + (MAX_SCORE - s) * 3.3;
+  // 17人以上は内外交互にずらすので、隣どうしの間隔が実質広がる分だけ円を小さくできる
+  const stagger = n > 16;
+  const rmin = Math.max(135, n * sz.spacing / (2 * Math.PI) / (stagger ? 1.6 : 1));
+  const step = stagger ? 2.6 : 3.3;
+  focusRadius = s => rmin + (MAX_SCORE - s) * step;
   const target = { [cid]:{ x:0, y:0 } };
   others.forEach((o, i) => {
     const ang = -Math.PI / 2 + (n <= 1 ? 0 : i * 2 * Math.PI / n);
-    const r = focusRadius(o.s) + (n > 16 && i % 2 ? 26 : 0);
+    const r = focusRadius(o.s) + (stagger && i % 2 ? 26 : 0);
     target[o.m.id] = { x:Math.cos(ang) * r, y:Math.sin(ang) * r };
   });
-  const ext = Math.max(focusRadius(MIN_SCORE), ...others.map(o => focusRadius(o.s))) + (n > 16 ? 101 : 75);
+  const ext = Math.max(focusRadius(MIN_SCORE), ...others.map(o => focusRadius(o.s))) + (stagger ? 101 : 75);
   return { target, vb:{ x:-ext, y:-ext + 10, w:ext * 2, h:ext * 2 } };
 }
 
