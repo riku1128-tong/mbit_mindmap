@@ -254,6 +254,14 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
 #map text{font-family:var(--body)}
 .edge .vis{fill:none;stroke:var(--tc);stroke-linecap:round;transition:opacity .2s}
 .edge.t3 .vis{opacity:.5}
+/* 人数が多いときは「ふつう」の線をさらに薄く、文字を小さくして見通しを保つ */
+#map[data-dense="1"] .edge.t3 .vis{opacity:.28}
+#map[data-dense="2"] .edge.t3 .vis{opacity:.16}
+#map[data-dense="2"] .edge.t4 .vis{opacity:.6}
+#map[data-dense="1"] .node .nname{font-size:12px}
+#map[data-dense="2"] .node .nname{font-size:11px}
+#map[data-dense="2"] .node .ncode{font-size:9.5px}
+#map[data-dense] .edge.on .vis,#map[data-dense] .edge.sel .vis{opacity:.95}
 .edge.t4 .vis{stroke-dasharray:5 6}
 .hit{fill:none;stroke:transparent;stroke-width:16;cursor:pointer}
 #edges.hl .edge:not(.on):not(.sel) .vis{opacity:.07}
@@ -602,7 +610,14 @@ function compat(a, b) {
 /* ---------- state ---------- */
 const SAMPLE = [['さくら','INFJ','T'],['けんた','ENTP','A'],['ゆい','ISFJ','T'],['はると','ESTP','A'],['みお','ENFP','T'],['そうた','ISTJ','A'],['あおい','INTP','']];
 const STORE_KEY = 'mbti-compat-map-v1';
-const MAX_MEMBERS = 20;
+const MAX_MEMBERS = 40;
+// 人数に応じてマップを詰める段階（0: 〜14人, 1: 15〜24人, 2: 25人〜）
+const density = () => members.length > 24 ? 2 : members.length > 14 ? 1 : 0;
+const SIZES = [
+  { r:30, center:42, other:28, collide:128, spacing:74, edge:1,   label:18 },
+  { r:25, center:37, other:23, collide:116, spacing:66, edge:.75, label:16 },
+  { r:21, center:33, other:19, collide:104, spacing:58, edge:.55, label:15 }
+];
 
 let members = [];
 let nextId = 1;
@@ -662,6 +677,7 @@ function forceLayout(seed) {
     y: Math.sin(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 53) % 13) - 6
   });
   const S = members.map(a => members.map(b => compat(keyOf(a), keyOf(b)).score));
+  const COL = SIZES[density()].collide;
   const IT = 600;
   for (let it = 0; it < IT; it++) {
     const alpha = 1 - it / IT;
@@ -671,7 +687,7 @@ function forceLayout(seed) {
       if (d < 0.01) { dx = 0.01 * (i - j); dy = 0.01; d = Math.hypot(dx, dy); }
       const L = 125 + (MAX_SCORE - S[i][j]) * 4.4;
       let f = (d - L) / d * 0.06 * alpha;
-      if (d < 128) f -= (128 - d) / d * 0.5;
+      if (d < COL) f -= (COL - d) / d * 0.5;
       P[i].x += dx * f; P[i].y += dy * f;
       P[j].x -= dx * f; P[j].y -= dy * f;
     }
@@ -699,15 +715,16 @@ function focusLayout(cid) {
     .map(m => ({ m, s:compat(keyOf(c), keyOf(m)).score }))
     .sort((p, q) => q.s - p.s || p.m.id - q.m.id);
   const n = others.length;
-  const rmin = Math.max(135, n * 74 / (2 * Math.PI));
+  const sz = SIZES[density()];
+  const rmin = Math.max(135, n * sz.spacing / (2 * Math.PI));
   focusRadius = s => rmin + (MAX_SCORE - s) * 3.3;
   const target = { [cid]:{ x:0, y:0 } };
   others.forEach((o, i) => {
     const ang = -Math.PI / 2 + (n <= 1 ? 0 : i * 2 * Math.PI / n);
-    const r = focusRadius(o.s);
+    const r = focusRadius(o.s) + (n > 16 && i % 2 ? 26 : 0);
     target[o.m.id] = { x:Math.cos(ang) * r, y:Math.sin(ang) * r };
   });
-  const ext = Math.max(focusRadius(MIN_SCORE), ...others.map(o => focusRadius(o.s))) + 75;
+  const ext = Math.max(focusRadius(MIN_SCORE), ...others.map(o => focusRadius(o.s))) + (n > 16 ? 101 : 75);
   return { target, vb:{ x:-ext, y:-ext + 10, w:ext * 2, h:ext * 2 } };
 }
 
@@ -743,11 +760,13 @@ function rebuildScene() {
   gRings.replaceChildren(); gEdges.replaceChildren(); gNodes.replaceChildren();
   sceneEdges = []; sceneNodes = {};
   state.hover = null; state.hoverPair = null; hideTip();
+  const sz = SIZES[density()];
+  svg.dataset.dense = density();
   if (state.mode === 'overview') {
     for (const { a, b, c } of allPairs()) {
       if (state.hidden.has(c.tier.key)) continue;
       const g = el('g', { class:`edge ${c.tier.key}`, 'data-a':a.id, 'data-b':b.id }, gEdges);
-      const w = 1.2 + (c.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5;
+      const w = (1.2 + (c.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5) * sz.edge;
       const vis = el('line', { class:'vis', 'stroke-width':w.toFixed(2) }, g);
       const hit = el('line', { class:'hit' }, g);
       const badge = makeBadge(g, c.score);
@@ -764,7 +783,7 @@ function rebuildScene() {
       const cc = compat(keyOf(c), keyOf(m));
       if (state.hidden.has(cc.tier.key)) return;
       const g = el('g', { class:`edge branch ${cc.tier.key}`, 'data-a':c.id, 'data-b':m.id }, gEdges);
-      const w = 2 + (cc.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5;
+      const w = (2 + (cc.score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE) * 5) * Math.max(sz.edge, .7);
       const vis = el('path', { class:'vis', 'stroke-width':w.toFixed(2) }, g);
       const hit = el('path', { class:'hit' }, g);
       const badge = makeBadge(g, cc.score);
@@ -773,18 +792,18 @@ function rebuildScene() {
   }
   for (const m of members) {
     const isCenter = state.mode === 'focus' && m.id === state.focusId;
-    const r = state.mode === 'overview' ? 30 : (isCenter ? 42 : 28);
+    const r = state.mode === 'overview' ? sz.r : (isCenter ? sz.center : sz.other);
     const g = el('g', {
       class:`node ${skinOf(m)}${isCenter ? ' center' : ''}`, 'data-id':m.id,
       tabindex:0, role:'button', 'aria-label':`${m.name}（${labelOf(m)}）`
     }, gNodes);
     el('circle', { class:'ring2', r:r + 6 }, g);
     el('circle', { r }, g);
-    const size = isCenter ? 36 : 28;
+    const size = Math.round(isCenter ? r * .86 : r * .93);
     const ic = el('g', { class:'nicon', transform:`translate(${-size / 2},${-size / 2}) scale(${size / 24})` }, g);
     ic.innerHTML = iconOf(m);
-    haloText(g, 'nname', { y:r + 18 }, m.name);
-    haloText(g, 'ncode', { y:r + 32 }, labelOf(m));
+    haloText(g, 'nname', { y:r + sz.label }, m.name);
+    haloText(g, 'ncode', { y:r + sz.label + 13 }, labelOf(m));
     sceneNodes[m.id] = g;
   }
   applyHighlight();
