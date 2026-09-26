@@ -186,7 +186,7 @@ button.tb:hover{filter:brightness(1.12)}
 /* stage */
 .stage{position:relative;min-height:0;background-color:var(--surface);background-image:radial-gradient(var(--grid) 1.2px,transparent 1.3px);background-size:22px 22px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
 #map{display:block;width:100%;height:100%;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none}
-.maphead{position:absolute;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:8px;pointer-events:none;flex-wrap:wrap}
+.maphead{position:absolute;top:12px;left:12px;right:12px;display:flex;flex-direction:column;gap:6px;pointer-events:none;z-index:2}
 .maphead > *{pointer-events:auto}
 .maptitle{font-family:var(--display);font-weight:700;font-size:16px;background:var(--surface);border-radius:9px;padding:3px 10px;box-shadow:0 0 0 1px var(--line)}
 .maphead .spacer{flex:1}
@@ -202,6 +202,119 @@ button.tb:hover{filter:brightness(1.12)}
 .chip:hover{background:var(--surface-2)}
 .hint{font-size:11.5px;color:var(--ink-2);background:var(--surface);border-radius:9px;padding:4px 10px;box-shadow:0 0 0 1px var(--line);max-width:100%}
 .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--ink-2);pointer-events:none;font-family:var(--display);font-size:16px}
+
+/* teams, tags, tools */
+.teambar{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:6px;margin-bottom:12px}
+.teambar .field{height:32px}
+.teamrename{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;margin:-4px 0 12px}
+.mcell{min-width:0;display:flex;flex-direction:column}
+.mtags{font-size:11px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-3px}
+.members.searching .mem:not(.qhit){opacity:.38}
+.mem.qhit .mname{color:var(--accent);font-weight:700}
+.tagedit{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--ink-2)}
+.tagedit .field{height:32px}
+.tagedit p{grid-column:1 / -1;margin:0;font-size:11px}
+.bias{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:12.5px}
+.bias li{border-left:3px solid var(--t4);padding-left:10px}
+.bias b{display:block}
+.bias span{color:var(--ink-2)}
+.bias.ok li{border-left-color:var(--accent)}
+.grouprow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)}
+.grouprow .field{height:32px}
+#groupResult{margin-top:8px}
+.grp{border-top:1px solid var(--line);padding-block:10px}
+.grph{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grph .num{font-size:12px}
+.grpm{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:6px}
+.chipbtn{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:2px 4px;border-radius:8px;font-size:13px;max-width:100%}
+.chipbtn .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chipbtn:hover{background:var(--surface-2)}
+.grpw{margin:6px 0 0;font-size:11.5px;color:var(--ink-2)}
+.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.toolgrid .btn{height:auto;min-height:34px;white-space:normal;padding:6px 8px;line-height:1.35}
+.toolgrid .wide{grid-column:1 / -1}
+.sharebox{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin-top:10px}
+.sharebox .field{height:32px;font-family:var(--mono);font-size:11px}
+.sharebox p{grid-column:1 / -1;margin:0}
+
+/* map toolbar */
+.mhrow{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;pointer-events:none}
+.mhrow > *{pointer-events:auto}
+.mhrow .spacer{flex:1;pointer-events:none}
+.seg{display:inline-flex;background:var(--surface);border-radius:9px;box-shadow:0 0 0 1px var(--line);padding:2px}
+.seg button{border:0;background:transparent;border-radius:7px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sbox{height:30px;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:0 10px;font-size:12.5px;min-width:0}
+input.sbox{width:min(220px,46vw)}
+.tagsel{max-width:160px}
+.scount{font-size:11.5px;color:var(--ink-2);background:var(--surface);border-radius:6px;padding:0 5px}
+.scount:empty{display:none}
+#map.searching .node:not(.qhit){opacity:.16}
+#map.searching .edge:not(.qhit) .vis{opacity:.04!important}
+#map.searching .node.qhit .ring2{opacity:1;stroke:var(--accent);stroke-width:3}
+
+/* heatmap */
+.heatwrap{position:absolute;left:12px;right:12px;top:96px;bottom:60px;overflow:auto;background:var(--surface);z-index:1;border-radius:8px}
+table.heat{border-collapse:separate;border-spacing:2px;font-size:11px}
+.heat th,.heat td{padding:0}
+.heat thead th{position:sticky;top:0;background:var(--surface);z-index:2;vertical-align:bottom}
+.heat th.corner{left:0;z-index:3;color:var(--ink-2);font-weight:500;text-align:left;font-size:11px;padding:0 4px 4px}
+.heat th.ch{width:30px;min-width:30px;cursor:pointer}
+.heat th.ch .chn{display:block;writing-mode:vertical-rl;max-height:84px;overflow:hidden;white-space:nowrap;margin:0 auto 4px;font-weight:700;font-size:11.5px}
+.heat th.ch .tb{width:20px;height:20px;margin:0 auto 2px;border-radius:6px}
+.heat th.ch .tb .ico{width:13px;height:13px}
+.heat th.rh{position:sticky;left:0;background:var(--surface);z-index:1;text-align:left;padding-right:6px;cursor:pointer}
+.heat th.rh .who2{display:flex;align-items:center;gap:6px;min-width:0;font-weight:500;font-size:12.5px}
+.heat th.rh .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:96px}
+.heat td{width:30px;min-width:30px;height:26px;text-align:center;position:relative;font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;border-radius:5px;isolation:isolate}
+.heat td.hc{cursor:pointer;color:var(--ink)}
+.heat td.hc::before{content:"";position:absolute;inset:0;border-radius:5px;background:var(--tc);opacity:var(--s);z-index:-1}
+.heat td.self{color:var(--ink-2);background:var(--surface-2)}
+.heat td.hc:hover{outline:2px solid var(--ink);outline-offset:-1px}
+.heat td.sel{outline:2px solid var(--accent);outline-offset:-1px}
+.heat.searching tbody tr:not(.qhit) th,.heat.searching tbody tr:not(.qhit) td{opacity:.28}
+.heat tr.qhit .t,.heat th.ch.qhit .chn{color:var(--accent)}
+.heatempty{padding:24px;text-align:center}
+
+/* 水見式 */
+.mizumi{margin:12px auto 0;max-width:220px;text-align:center}
+.mizumi svg{display:block;width:100%;height:auto;overflow:visible}
+.mz-cap{margin:2px 0 0;font-size:12px;color:var(--ink-2)}
+.mz-cap b{color:var(--ink);margin-right:6px}
+.mz-replay{display:block;margin:4px auto 0}
+.mz-aura{fill:var(--g);opacity:0;animation:mzAura 1.6s ease-in-out .2s infinite alternate}
+.mz-glass{fill:none;stroke:var(--ink-2);stroke-width:2.2;stroke-linejoin:round}
+.mz-water{fill:#6FB4E6;fill-opacity:.55}
+.mz-leaf{fill:#5FA84A}
+.mz-vein{fill:none;stroke:#2F6B25;stroke-width:1}
+.mz-leafwrap,.mz-water,.mz-leaf,.mz-dust,.mz-bubbles,.mz-drops{transform-box:fill-box;transform-origin:center}
+.mz-dust,.mz-bubbles,.mz-drops,.mz-spark{opacity:0}
+.mz-dust{fill:#6B5B45}
+.mz-bubbles{fill:#FFFFFF}
+.mz-drops{fill:#6FB4E6}
+.mz-spark{fill:var(--g)}
+@keyframes mzAura{from{opacity:.05}to{opacity:.3}}
+.mz-kyoka .mz-water,.mz-kyoka .mz-leafwrap{animation:mzRise 2.2s ease-out .6s forwards}
+.mz-kyoka .mz-drops{animation:mzDrop 1.4s ease-in 2.4s 2}
+@keyframes mzRise{to{transform:translateY(-21px)}}
+@keyframes mzDrop{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(46px)}}
+.mz-hoshutsu .mz-water{animation:mzColor 2.4s ease-in-out .6s forwards}
+@keyframes mzColor{to{fill:var(--g);fill-opacity:.85}}
+.mz-sosa .mz-leafwrap{animation:mzSpin 3s ease-in-out .6s forwards}
+@keyframes mzSpin{0%{transform:rotate(0)}40%{transform:translateX(9px) rotate(130deg)}70%{transform:translateX(-7px) rotate(250deg)}100%{transform:translateX(0) rotate(360deg)}}
+.mz-gugenka .mz-dust{animation:mzDust 2.4s ease-out .8s forwards}
+@keyframes mzDust{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.mz-henka .mz-bubbles{animation:mzBub 1.6s ease-in .6s 3}
+.mz-henka .mz-water{animation:mzShimmer 1.2s ease-in-out .6s 4 alternate}
+@keyframes mzBub{0%{opacity:0;transform:translateY(0)}20%{opacity:.9}100%{opacity:0;transform:translateY(-50px)}}
+@keyframes mzShimmer{to{fill-opacity:.85}}
+.mz-tokushitsu .mz-leaf{animation:mzWither 2.6s ease-in .6s forwards}
+.mz-tokushitsu .mz-water{animation:mzPrism 3s linear .6s infinite}
+.mz-tokushitsu .mz-spark{animation:mzSpark 1.2s ease-in-out 1s infinite alternate}
+@keyframes mzWither{to{fill:#8A6A3A;transform:scale(.7) rotate(-20deg)}}
+@keyframes mzPrism{0%{fill:#6FB4E6}33%{fill:#B28CF2}66%{fill:#F2C624}100%{fill:#6FB4E6}}
+@keyframes mzSpark{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.mizumi *{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}}
 
 /* aura (hidden mode) */
 .nen-kyoka{--c:#D93A32} .nen-hoshutsu{--c:#EE8A2E;--ci:#10140F} .nen-sosa{--c:#3E9B5A}
@@ -300,6 +413,9 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
   .hint{display:none}
 }
 @media (max-width:420px){
+  .teambar{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .teambar select{grid-column:1 / -1}
+  .toolgrid{grid-template-columns:1fr}
   .addrow{grid-template-columns:minmax(0,1fr) 92px 62px}
   .addrow .btn{grid-column:1 / -1}
   .top h1{font-size:20px}
@@ -323,6 +439,17 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
 <main class="app">
   <aside class="side">
     <section class="panel" aria-labelledby="membersTitle">
+      <div class="teambar">
+        <select class="field" id="teamSelect" aria-label="表示するチーム"></select>
+        <button class="btn ghost small" id="teamNew" type="button">＋ 新規</button>
+        <button class="btn ghost small" id="teamRename" type="button">名前変更</button>
+        <button class="btn ghost small" id="teamDelete" type="button">削除</button>
+      </div>
+      <form class="teamrename" id="teamRenameForm" hidden>
+        <input class="field" id="teamNameInput" maxlength="24" aria-label="チーム名" autocomplete="off">
+        <button class="btn small" type="submit">保存</button>
+        <button class="btn ghost small" type="button" id="teamRenameCancel">やめる</button>
+      </form>
       <h2 id="membersTitle">メンバー <span class="tag" id="countTag">0人</span></h2>
       <div class="samplenote" id="sampleNote" hidden>
         <span>サンプルのメンバーを表示しています</span>
@@ -344,7 +471,7 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
       </form>
       <details class="bulk">
         <summary>まとめて貼り付けで追加</summary>
-        <textarea id="bulkInput" placeholder="1行に1人ずつ（例）&#10;たかし INTJ-A&#10;はなこ, ESFJ-T&#10;じろう ISTP"></textarea>
+        <textarea id="bulkInput" placeholder="1行に1人ずつ（例）&#10;たかし INTJ-A #営業&#10;はなこ, ESFJ-T #新人 #営業&#10;じろう ISTP"></textarea>
         <div class="row"><button class="btn ghost small" id="bulkAdd" type="button">読み込む</button></div>
       </details>
       <ul class="members" id="memberList"></ul>
@@ -355,6 +482,34 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
     </section>
 
     <section class="panel" id="detail" aria-live="polite"></section>
+
+    <section class="panel" id="groupPanel" aria-labelledby="groupTitle">
+      <h2 id="groupTitle">班分けの提案</h2>
+      <div class="grouprow">
+        <label for="groupCount">班の数</label>
+        <select class="field" id="groupCount"></select>
+        <button class="btn small" id="groupRun" type="button">提案する</button>
+      </div>
+      <div id="groupResult" aria-live="polite"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="shareTitle">
+      <h2 id="shareTitle">共有・保存</h2>
+      <div class="toolgrid">
+        <button class="btn ghost small" id="shareBtn" type="button">共有リンクを作る</button>
+        <button class="btn ghost small" id="pngBtn" type="button">マップを画像で保存</button>
+        <button class="btn ghost small" id="csvBtn" type="button">このチームをCSVで書き出す</button>
+        <button class="btn ghost small" id="jsonBtn" type="button">全チームを書き出す（JSON）</button>
+        <button class="btn ghost small wide" id="importBtn" type="button">ファイルを読み込む（JSON・CSV）</button>
+        <input type="file" id="importFile" accept=".json,.csv,application/json,text/csv" hidden>
+      </div>
+      <div class="sharebox" id="shareBox" hidden>
+        <input class="field" id="shareUrl" readonly aria-label="共有リンク">
+        <button class="btn small" id="shareCopy" type="button">コピー</button>
+        <p class="identhint">リンクには、このチームのメンバー名・タイプ・タグが含まれます。見せたい人にだけ送ってください。開いた人の画面には、新しいチームとして追加されます。</p>
+      </div>
+      <div class="formmsg" id="toolMsg" aria-live="polite"></div>
+    </section>
 
     <p class="note" id="auraNote" hidden>オーラ診断は『HUNTER×HUNTER』の念の六系統（六性図の距離と、ヒソカのオーラ別性格診断）をもとにしたお遊び機能です。MBTIから系統への対応は <a href="https://note.com/nagasawa_osamu/n/n724d064cbe65" target="_blank" rel="noopener">こちらのnote記事</a> の分類を参考にしています。</p>
     <p class="note" id="mbtiNote">相性スコアはMBTIの4つの指標（E/I・N/S・T/F・J/P）と、入力されていれば5文字目のA/Tの組み合わせから算出した目安です。性格タイプは人を決めつけるものではないので、話のきっかけとして使ってください。</p>
@@ -369,11 +524,28 @@ html.aura .top h1{text-shadow:0 0 14px rgba(142,91,224,.55)}
     <div class="empty" id="emptyMsg" hidden></div>
     <div class="tip" id="tip" role="tooltip" hidden></div>
     <div class="toast" id="toast" role="status" hidden></div>
-    <div class="maphead">
-      <button class="btn ghost small" id="backBtn" type="button" hidden style="background:var(--surface)">← 全体マップ</button>
-      <div class="maptitle" id="mapTitle">全体マップ</div>
-      <span class="spacer"></span>
-      <button class="btn ghost small" id="relayoutBtn" type="button" style="background:var(--surface)">並べ直す</button>
+    <div class="heatwrap" id="heat" hidden></div>
+    <div class="maphead" id="maphead">
+      <div class="mhrow">
+        <button class="btn ghost small" id="backBtn" type="button" hidden style="background:var(--surface)">← 全体マップ</button>
+        <div class="maptitle" id="mapTitle">全体マップ</div>
+        <span class="spacer"></span>
+        <div class="seg" role="group" aria-label="表示の切り替え">
+          <button type="button" data-view="map" aria-pressed="true">マップ</button>
+          <button type="button" data-view="heat" aria-pressed="false">相性表</button>
+        </div>
+      </div>
+      <div class="mhrow">
+        <input type="search" class="sbox" id="searchInput" placeholder="名前・タイプ・タグで検索" aria-label="メンバーを検索" autocomplete="off">
+        <span class="scount" id="searchCount"></span>
+        <select class="sbox tagsel" id="tagFilter" aria-label="タグで絞り込み"></select>
+        <select class="sbox" id="heatSort" aria-label="相性表の並び順" hidden>
+          <option value="added">登録順</option>
+          <option value="type">タイプ順</option>
+        </select>
+        <span class="spacer"></span>
+        <button class="btn ghost small" id="relayoutBtn" type="button" style="background:var(--surface)">並べ直す</button>
+      </div>
     </div>
     <div class="mapfoot">
       <div class="legend" id="legend" role="group" aria-label="表示する相性の種類"></div>
@@ -612,10 +784,12 @@ function compat(a, b) {
 
 /* ---------- state ---------- */
 const SAMPLE = [['さくら','INFJ','T'],['けんた','ENTP','A'],['ゆい','ISFJ','T'],['はると','ESTP','A'],['みお','ENFP','T'],['そうた','ISTJ','A'],['あおい','INTP','']];
-const STORE_KEY = 'mbti-compat-map-v1';
+const STORE_KEY = 'mbti-compat-map-v2';
+const OLD_STORE_KEY = 'mbti-compat-map-v1';
+const MAX_TEAMS = 30;
 const MAX_MEMBERS = 40;
 // 人数に応じてマップを詰める段階（0: 〜14人, 1: 15〜24人, 2: 25人〜）
-const density = () => members.length > 24 ? 2 : members.length > 14 ? 1 : 0;
+const density = () => shown.length > 24 ? 2 : shown.length > 14 ? 1 : 0;
 const SIZES = [
   { r:30, center:42, other:28, collide:128, spacing:74, edge:1,   label:18 },
   { r:25, center:37, other:23, collide:116, spacing:66, edge:.75, label:16 },
@@ -624,7 +798,12 @@ const SIZES = [
 
 let members = [];
 let nextId = 1;
-const state = { aura:false, mode:'overview', focusId:null, pair:null, hover:null, hoverPair:null, hidden:new Set(), isSample:false };
+// 複数チーム。members / nextId は選択中チームの作業用コピー（save で書き戻す）
+let teams = [], teamId = 0;
+// タグで絞り込んだ「表示中のメンバー」。マップ・相性表・概要・班分けはこれを使う
+let shown = [];
+let groupResult = null;
+const state = { view:'map', query:'', tag:'', heatSort:'added', aura:false, mode:'overview', focusId:null, pair:null, hover:null, hoverPair:null, hidden:new Set(), isSample:false };
 let pos = {}, overviewPos = {}, viewBox = { x:-300, y:-220, w:600, h:440 };
 let focusRadius = null;
 let anim = 0;
@@ -641,32 +820,85 @@ const labelOf = m => state.aura ? NEN[nenOf(m)].name : codeOf(m);
 const titleOf = m => state.aura ? `${NEN[nenOf(m)].name}（${codeOf(m)} ${DESC[m.type]}）` : `${codeOf(m)} ${DESC[m.type]}`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
+const curTeam = () => teams.find(t => t.id === teamId);
+// タグは「#」なし・12文字まで・1人8個まで。スペース・カンマ・#で区切れる
+function normTags(v) {
+  const arr = Array.isArray(v) ? v : String(v || '').split(/[\s,、，;；#＃]+/);
+  const out = [];
+  for (const raw of arr) {
+    const t = String(raw).replace(/^[#＃]+/, '').trim().slice(0, 12);
+    if (t && !out.includes(t)) out.push(t);
+    if (out.length >= 8) break;
+  }
+  return out;
+}
+function normMember(m, id) {
+  if (!m) return null;
+  const mm = String(m.type || '').toUpperCase().trim().match(/^([EI][NS][TF][JP])(?:-([AT]))?$/);
+  if (!mm) return null;
+  return {
+    id, name:String(m.name || '').trim().slice(0, 16) || '名無し', type:mm[1],
+    ident:IDENT[m.ident] ? m.ident : (mm[2] || ''), nen:NEN[m.nen] ? m.nen : '', tags:normTags(m.tags)
+  };
+}
+function uniqueTeamName(base) {
+  let n = base, i = 2;
+  while (teams.some(t => t.name === n)) n = `${base}（${i++}）`;
+  return n;
+}
+function makeTeam(name, list, isSample) {
+  const ms = (list || []).map((m, i) => normMember(m, i + 1)).filter(Boolean).slice(0, MAX_MEMBERS);
+  ms.forEach((m, i) => { m.id = i + 1; });
+  return { id:Math.max(0, ...teams.map(t => t.id)) + 1, name:uniqueTeamName(String(name || '').trim().slice(0, 24) || 'チーム'), members:ms, nextId:ms.length + 1, isSample:!!isSample };
+}
+function useTeam(id) {
+  const t = teams.find(x => x.id === id) || teams[0];
+  teamId = t.id; members = t.members; nextId = t.nextId; state.isSample = !!t.isSample;
+}
 function save() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({ members, nextId, isSample:state.isSample })); } catch (e) {}
+  const t = curTeam();
+  if (t) { t.members = members; t.nextId = nextId; t.isSample = state.isSample; }
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ teams, teamId })); } catch (e) {}
 }
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-    if (!d || !Array.isArray(d.members)) return false;
-    members = d.members.filter(m => m && TYPES.includes(m.type) && Number.isInteger(m.id))
-      .map(m => ({ id:m.id, name:String(m.name || '').slice(0, 16) || '名無し', type:m.type, ident:IDENT[m.ident] ? m.ident : '', nen:NEN[m.nen] ? m.nen : '' }));
-    nextId = Math.max(d.nextId || 1, ...members.map(m => m.id + 1), 1);
-    state.isSample = !!d.isSample;
-    return true;
-  } catch (e) { return false; }
+    if (d && Array.isArray(d.teams) && d.teams.length) {
+      teams = [];
+      let want = 0;
+      for (const t of d.teams.slice(0, MAX_TEAMS)) {
+        const nt = makeTeam(t.name, t.members, t.isSample);
+        teams.push(nt);
+        if (t.id === d.teamId) want = nt.id;
+      }
+      useTeam(want);
+      return true;
+    }
+    // 旧バージョン（1チームだけ保存していた頃）のデータを取り込む
+    const old = JSON.parse(localStorage.getItem(OLD_STORE_KEY) || 'null');
+    if (old && Array.isArray(old.members)) {
+      teams = [makeTeam(old.isSample ? 'サンプル' : 'チーム1', old.members, old.isSample)];
+      useTeam(teams[0].id);
+      return true;
+    }
+  } catch (e) {}
+  return false;
 }
 function loadSample() {
-  members = SAMPLE.map(([name, type, ident], i) => ({ id:i + 1, name, type, ident }));
-  nextId = members.length + 1;
-  state.isSample = true;
+  teams = [makeTeam('サンプル', SAMPLE.map(([name, type, ident]) => ({ name, type, ident })), true)];
+  useTeam(teams[0].id);
+}
+function updateShown() {
+  if (state.tag && !members.some(m => m.tags.includes(state.tag))) state.tag = '';
+  shown = state.tag ? members.filter(m => m.tags.includes(state.tag)) : members;
 }
 
 /* ---------- layouts ---------- */
 function allPairs() {
   const out = [];
-  for (let i = 0; i < members.length; i++)
-    for (let j = i + 1; j < members.length; j++) {
-      const a = members[i], b = members[j];
+  for (let i = 0; i < shown.length; i++)
+    for (let j = i + 1; j < shown.length; j++) {
+      const a = shown[i], b = shown[j];
       out.push({ a, b, c:compat(keyOf(a), keyOf(b)) });
     }
   return out;
@@ -674,12 +906,12 @@ function allPairs() {
 
 // 相性が良いほど近くに寄る、ばねモデルの配置
 function forceLayout(seed) {
-  const n = members.length;
-  const P = members.map((m, i) => seed[m.id] ? { ...seed[m.id] } : {
+  const n = shown.length;
+  const P = shown.map((m, i) => seed[m.id] ? { ...seed[m.id] } : {
     x: Math.cos(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 37) % 11) - 5,
     y: Math.sin(2 * Math.PI * i / Math.max(n, 1) - Math.PI / 2) * 200 + ((i * 53) % 13) - 6
   });
-  const S = members.map(a => members.map(b => compat(keyOf(a), keyOf(b)).score));
+  const S = shown.map(a => shown.map(b => compat(keyOf(a), keyOf(b)).score));
   const COL = SIZES[density()].collide;
   const IT = 600;
   for (let it = 0; it < IT; it++) {
@@ -698,7 +930,7 @@ function forceLayout(seed) {
   const cx = P.reduce((s, p) => s + p.x, 0) / Math.max(n, 1);
   const cy = P.reduce((s, p) => s + p.y, 0) / Math.max(n, 1);
   const out = {};
-  members.forEach((m, i) => { out[m.id] = { x:P[i].x - cx, y:P[i].y - cy }; });
+  shown.forEach((m, i) => { out[m.id] = { x:P[i].x - cx, y:P[i].y - cy }; });
   return out;
 }
 
@@ -706,7 +938,7 @@ function fitVB(p) {
   const pts = Object.values(p);
   if (!pts.length) return { x:-300, y:-220, w:600, h:440 };
   let x0 = Math.min(...pts.map(q => q.x)) - 80, x1 = Math.max(...pts.map(q => q.x)) + 80;
-  let y0 = Math.min(...pts.map(q => q.y)) - 110, y1 = Math.max(...pts.map(q => q.y)) + 150;
+  let y0 = Math.min(...pts.map(q => q.y)) - 160, y1 = Math.max(...pts.map(q => q.y)) + 150;
   const w = Math.max(x1 - x0, 600), h = Math.max(y1 - y0, 440);
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   return { x:cx - w / 2, y:cy - h / 2, w, h };
@@ -714,7 +946,7 @@ function fitVB(p) {
 
 function focusLayout(cid) {
   const c = byId(cid);
-  const others = members.filter(m => m.id !== cid)
+  const others = shown.filter(m => m.id !== cid)
     .map(m => ({ m, s:compat(keyOf(c), keyOf(m)).score }))
     .sort((p, q) => q.s - p.s || p.m.id - q.m.id);
   const n = others.length;
@@ -731,7 +963,7 @@ function focusLayout(cid) {
     target[o.m.id] = { x:Math.cos(ang) * r, y:Math.sin(ang) * r };
   });
   const ext = Math.max(focusRadius(MIN_SCORE), ...others.map(o => focusRadius(o.s))) + (stagger ? 101 : 75);
-  return { target, vb:{ x:-ext, y:-ext + 10, w:ext * 2, h:ext * 2 } };
+  return { target, vb:{ x:-ext, y:-ext - 50, w:ext * 2, h:ext * 2 + 50 } };
 }
 
 /* ---------- SVG scene ---------- */
@@ -785,7 +1017,7 @@ function rebuildScene() {
       el('circle', { class:'ring', r, cx:0, cy:0 }, gRings);
       haloText(gRings, 'ringlabel', { x:-r + 6, y:-6 }, `${t.min}+ ${t.name}`);
     }
-    members.filter(m => m.id !== c.id).forEach((m, i) => {
+    shown.filter(m => m.id !== c.id).forEach((m, i) => {
       const cc = compat(keyOf(c), keyOf(m));
       if (state.hidden.has(cc.tier.key)) return;
       const g = el('g', { class:`edge branch ${cc.tier.key}`, 'data-a':c.id, 'data-b':m.id }, gEdges);
@@ -796,7 +1028,7 @@ function rebuildScene() {
       sceneEdges.push({ a:c.id, b:m.id, g, vis, hit, badge, kind:'curve' });
     });
   }
-  for (const m of members) {
+  for (const m of shown) {
     const isCenter = state.mode === 'focus' && m.id === state.focusId;
     const r = state.mode === 'overview' ? sz.r : (isCenter ? sz.center : sz.other);
     const g = el('g', {
@@ -813,6 +1045,7 @@ function rebuildScene() {
     sceneNodes[m.id] = g;
   }
   applyHighlight();
+  applySearch();
 }
 
 function updatePositions() {
@@ -856,23 +1089,24 @@ function applyHighlight() {
     sceneNodes[id].classList.toggle('sel', !!sel);
     sceneNodes[id].classList.toggle('hov', n === hov);
   }
+  markHeatPair();
 }
 
 function animateTo(target, vb, instant) {
   cancelAnimationFrame(anim);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const from = {};
-  for (const m of members) from[m.id] = pos[m.id] ? { ...pos[m.id] } : { ...target[m.id] };
+  for (const m of shown) from[m.id] = pos[m.id] ? { ...pos[m.id] } : { ...target[m.id] };
   const fromVB = { ...viewBox };
   if (instant || reduce) {
-    pos = {}; for (const m of members) pos[m.id] = { ...target[m.id] };
+    pos = {}; for (const m of shown) pos[m.id] = { ...target[m.id] };
     viewBox = { ...vb }; updatePositions(); return;
   }
   const t0 = performance.now(), D = 520;
   const step = now => {
     const t = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - t, 3);
     const next = {};
-    for (const m of members) {
+    for (const m of shown) {
       const a = from[m.id], b = target[m.id];
       next[m.id] = { x:a.x + (b.x - a.x) * e, y:a.y + (b.y - a.y) * e };
     }
@@ -895,26 +1129,29 @@ const emptyMsg = document.getElementById('emptyMsg');
 function renderChrome() {
   const focus = state.mode === 'focus';
   const c = focus ? byId(state.focusId) : null;
-  mapTitle.textContent = focus ? `${c.name}（${labelOf(c)}）から見た相性` : (state.aura ? '全体マップ（オーラ）' : '全体マップ');
-  backBtn.hidden = !focus;
-  relayoutBtn.hidden = focus || members.length < 3;
-  hint.textContent = focus
+  mapTitle.textContent = (state.tag ? `#${state.tag} · ` : '') + (state.view === 'heat' ? (state.aura ? '相性表（オーラ）' : '相性表')
+    : focus ? `${c.name}（${labelOf(c)}）から見た相性` : (state.aura ? '全体マップ（オーラ）' : '全体マップ'));
+  backBtn.hidden = !focus || state.view === 'heat';
+  relayoutBtn.hidden = focus || state.view === 'heat' || shown.length < 3;
+  hint.textContent = state.view === 'heat' ? 'セルにマウスを乗せると相性の中身 ／ クリックでペアの詳細 ／ 名前をクリックでその人の相性一覧' : focus
     ? '中心に近いほど相性◎ ／ マウスを乗せると相性の中身 ／ Escで全体へ'
     : '線や丸にマウスを乗せると相性の中身 ／ 丸をクリックでその人中心 ／ ドラッグで移動';
 
   const counts = { t1:0, t2:0, t3:0, t4:0 };
-  if (focus) members.forEach(m => { if (m.id !== c.id) counts[compat(keyOf(c), keyOf(m)).tier.key]++; });
+  if (focus) shown.forEach(m => { if (m.id !== c.id) counts[compat(keyOf(c), keyOf(m)).tier.key]++; });
   else allPairs().forEach(p => counts[p.c.tier.key]++);
   legend.innerHTML = TIERS.map(t =>
     `<button type="button" class="chip ${t.key}" data-tier="${t.key}" aria-pressed="${!state.hidden.has(t.key)}"><span class="sw"></span>${t.name}<span class="c">${counts[t.key]}</span></button>`
   ).join('');
 
-  emptyMsg.hidden = members.length >= 2;
-  emptyMsg.textContent = members.length === 0
-    ? 'メンバーを2人以上追加すると、相性マップが表示されます'
+  emptyMsg.hidden = shown.length >= 2;
+  emptyMsg.textContent = shown.length === 0
+    ? (state.tag ? `タグ「#${state.tag}」のメンバーがいません` : 'メンバーを2人以上追加すると、相性マップが表示されます')
     : '';
-  if (members.length === 1) { emptyMsg.hidden = false; emptyMsg.style.alignItems = 'flex-end'; emptyMsg.style.paddingBottom = '72px'; emptyMsg.textContent = 'もう1人追加すると相性が表示されます'; }
+  if (shown.length === 1) { emptyMsg.hidden = false; emptyMsg.style.alignItems = 'flex-end'; emptyMsg.style.paddingBottom = '72px'; emptyMsg.textContent = 'もう1人追加すると相性が表示されます'; }
   else { emptyMsg.style.alignItems = ''; emptyMsg.style.paddingBottom = ''; }
+  if (state.view === 'heat') emptyMsg.hidden = true;
+  renderToolbar();
 }
 
 /* ---------- side panels ---------- */
@@ -936,15 +1173,17 @@ function renderMembers() {
   document.getElementById('sampleNote').hidden = !state.isSample || !members.length;
   document.getElementById('memFoot').hidden = !members.length;
   memberList.innerHTML = members.map(m => `
-    <li class="mem">
+    <li class="mem" data-id="${m.id}">
       <button type="button" class="tb ${skinOf(m)}" data-focus="${m.id}" title="${esc(m.name)}を中心に表示（${titleOf(m)}）" aria-label="${esc(m.name)}を中心に表示">${iconFor(m)}</button>
-      <input class="mname" id="name-${m.id}" data-name="${m.id}" value="${esc(m.name)}" maxlength="16" autocomplete="off" aria-label="${esc(m.name)}の名前" title="クリックして名前を書き換え">
+      <div class="mcell"><input class="mname" id="name-${m.id}" data-name="${m.id}" value="${esc(m.name)}" maxlength="16" autocomplete="off" aria-label="${esc(m.name)}の名前" title="クリックして名前を書き換え">${m.tags.length ? `<span class="mtags">${m.tags.map(t => '#' + esc(t)).join(' ')}</span>` : ''}</div>
       <select id="type-${m.id}" data-type="${m.id}" aria-label="${esc(m.name)}のタイプ">${typeOptions(m.type)}</select>
       <select id="ident-${m.id}" data-ident="${m.id}" aria-label="${esc(m.name)}の5文字目（A/T）" title="A＝自己主張型 / T＝慎重型">
         <option value=""${m.ident ? '' : ' selected'}>—</option><option value="A"${m.ident === 'A' ? ' selected' : ''}>-A</option><option value="T"${m.ident === 'T' ? ' selected' : ''}>-T</option>
       </select>
       <button type="button" class="x" data-del="${m.id}" aria-label="${esc(m.name)}を削除">×</button>
     </li>`).join('');
+  renderTeams();
+  applySearch();
 }
 
 const personChip = m => `<span class="tb ${skinOf(m)}" role="img" title="${titleOf(m)}" aria-label="${titleOf(m)}">${iconFor(m)}</span><span class="t">${esc(m.name)}</span>${m.ident ? `<span class="idn">-${m.ident}</span>` : ''}`;
@@ -962,7 +1201,7 @@ function hexSVG(mode, self) {
   const pt = (i, r) => [cx + r * Math.cos((-90 + i * 60) * Math.PI / 180), cy + r * Math.sin((-90 + i * 60) * Math.PI / 180)];
   const poly = NEN_ORDER.map((k, i) => pt(i, R).map(v => v.toFixed(1)).join(',')).join(' ');
   const counts = {};
-  if (mode === 'count') members.forEach(m => { const k = nenOf(m); counts[k] = (counts[k] || 0) + 1; });
+  if (mode === 'count') shown.forEach(m => { const k = nenOf(m); counts[k] = (counts[k] || 0) + 1; });
   const nodes = NEN_ORDER.map((k, i) => {
     const [x, y] = pt(i, R);
     // 系統名は丸の外側へ：上下は丸の上/下、左右は丸の横に寄せる
@@ -984,7 +1223,7 @@ function hexSVG(mode, self) {
 }
 
 function renderTeam() {
-  if (members.length < 2) {
+  if (shown.length < 2) {
     detail.innerHTML = `<h2>チームの概要</h2><p class="muted">2人以上そろうと、ベストな組み合わせやタイプの分布がここに表示されます。</p>`;
     return;
   }
@@ -994,27 +1233,28 @@ function renderTeam() {
   const k = Math.min(3, Math.floor(pairs.length / 2) || 1);
   const best = sorted.slice(0, k);
   const worst = pairs.length > 1 ? sorted.slice(-k).reverse() : [];
-  const cnt = i => members.filter(m => m.type[i] === 'EINSTFJP'[i * 2]).length;
+  const cnt = i => shown.filter(m => m.type[i] === 'EINSTFJP'[i * 2]).length;
   const axes = [['E','I',0],['N','S',1],['T','F',2],['J','P',3]];
-  const n = members.length;
+  const n = shown.length;
   const groups = { nt:0, nf:0, sj:0, sp:0 };
-  members.forEach(m => groups[groupOf(m.type)]++);
+  shown.forEach(m => groups[groupOf(m.type)]++);
   detail.innerHTML = `
     <h2>チームの概要</h2>
     <div class="stats">
       <div class="stat"><b>${pairs.length}</b><span>組み合わせ</span></div>
       <div class="stat"><b>${avg}</b><span>平均相性スコア · ${tierOf(avg).name}</span></div>
     </div>
+    ${state.aura ? '' : biasHTML(shown)}
     <h3>相性ベスト</h3>
     <ul class="rank">${best.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>
     ${worst.length ? `<h3>歩み寄りが大事な組み合わせ</h3><ul class="rank">${worst.map(p => pairRow(p.a, p.b, p.c)).join('')}</ul>` : ''}
     ${state.aura ? `<h3>六性図での分布</h3>${hexSVG('count')}
-    <ul class="nenlist">${NEN_ORDER.filter(k => members.some(m => nenOf(m) === k)).map(k => `<li><span class="tb tyc nen-${k}">${`<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${NEN_ICONS[k]}</svg>`}</span><b>${NEN[k].name}</b><span>${members.filter(m => nenOf(m) === k).map(m => esc(m.name)).join('、')}</span></li>`).join('')}</ul>` : `<h3>指標ごとの分布</h3>
+    <ul class="nenlist">${NEN_ORDER.filter(k => shown.some(m => nenOf(m) === k)).map(k => `<li><span class="tb tyc nen-${k}">${`<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${NEN_ICONS[k]}</svg>`}</span><b>${NEN[k].name}</b><span>${shown.filter(m => nenOf(m) === k).map(m => esc(m.name)).join('、')}</span></li>`).join('')}</ul>` : `<h3>指標ごとの分布</h3>
     <div class="dist">${axes.map(([l, r, i]) => {
       const c = cnt(i);
       return `<div class="drow"><span>${l} ${c}</span><span class="split" role="img" aria-label="${l} ${c}人、${r} ${n - c}人"><i style="width:${c / n * 100}%"></i><i style="width:${(n - c) / n * 100}%"></i></span><span class="r">${n - c} ${r}</span></div>`;
     }).join('')}${(() => {
-      const a = members.filter(m => m.ident === 'A').length, t = members.filter(m => m.ident === 'T').length, u = n - a - t;
+      const a = shown.filter(m => m.ident === 'A').length, t = shown.filter(m => m.ident === 'T').length, u = n - a - t;
       if (!a && !t) return '';
       return `<div class="drow"><span>A ${a}</span><span class="split" role="img" aria-label="A ${a}人、T ${t}人、未入力 ${u}人"><i style="width:${a / n * 100}%"></i><i style="width:${t / n * 100}%"></i></span><span class="r">${t} T</span></div>`
         + (u ? `<div class="identhint" style="margin-top:0">A/T未入力: ${u}人</div>` : '');
@@ -1025,7 +1265,7 @@ function renderTeam() {
 function renderMember(id) {
   const m = byId(id);
   const st = stackOf(m.type);
-  const ranks = members.filter(o => o.id !== id).map(o => ({ o, c:compat(keyOf(m), keyOf(o)) }))
+  const ranks = shown.filter(o => o.id !== id).map(o => ({ o, c:compat(keyOf(m), keyOf(o)) }))
     .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
   const labels = ['主機能','補助','第三','劣等'];
   const rankList = `<ul class="rank">${ranks.map(({ o, c }) => `<li><button type="button" class="rowbtn" data-pair="${m.id},${o.id}">
@@ -1040,6 +1280,8 @@ function renderMember(id) {
       <span class="badge-type" title="${NEN[k].name}">${iconFor(m)}</span>
       <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="code">${NEN[k].name}</span> ${NEN[k].trait}</div></div>
     </div>
+    ${mizumiHTML(k)}
+    ${tagEditor(m)}
     ${hexSVG('rate', k)}
     <p class="muted">水見式では「${NEN[k].water}」タイプ。${m.nen ? '系統は手動で設定しています。' : `${codeOf(m)}（${DESC[m.type]}）から判定しました。`}</p>
     <label class="nensel" for="nen-${m.id}">系統
@@ -1058,6 +1300,7 @@ function renderMember(id) {
       <span class="badge-type" title="${m.type} ${DESC[m.type]}">${iconFor(m)}</span>
       <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="code">${codeOf(m)}</span> ${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}${m.ident ? ` · ${IDENT[m.ident]}（${m.ident}）` : ''}</div></div>
     </div>
+    ${tagEditor(m)}
     <div class="fns">${st.map((f, i) => `<div class="fn"><small>${labels[i]}</small><b>${f}</b><span>${FN_NAME[f]}</span></div>`).join('')}</div>
     <h3>相性ランキング</h3>
     ${rankList}`;
@@ -1101,7 +1344,7 @@ function renderPanel() {
 /* ---------- actions ---------- */
 function focusOn(id) {
   if (!byId(id)) return;
-  if (members.length < 2) { state.pair = null; renderPanel(); return; }
+  if (shown.length < 2) { state.pair = null; renderPanel(); return; }
   state.mode = 'focus'; state.focusId = id; state.pair = null; state.hover = null;
   const { target, vb } = focusLayout(id);
   rebuildScene(); updatePositions();
@@ -1123,21 +1366,23 @@ function clearPair() {
 }
 
 function refresh(instant) {
-  if (state.focusId != null && !byId(state.focusId)) { state.mode = 'overview'; state.focusId = null; }
-  if (state.mode === 'focus' && members.length < 2) { state.mode = 'overview'; state.focusId = null; }
-  if (state.pair && !(byId(state.pair[0]) && byId(state.pair[1]))) state.pair = null;
+  updateShown();
+  const isShown = id => shown.some(m => m.id === id);
+  if (state.focusId != null && !isShown(state.focusId)) { state.mode = 'overview'; state.focusId = null; }
+  if (state.mode === 'focus' && shown.length < 2) { state.mode = 'overview'; state.focusId = null; }
+  if (state.pair && !(isShown(state.pair[0]) && isShown(state.pair[1]))) state.pair = null;
   overviewPos = forceLayout(overviewPos);
   let target, vb;
   if (state.mode === 'focus') ({ target, vb } = focusLayout(state.focusId));
   else { target = overviewPos; vb = fitVB(overviewPos); }
   rebuildScene(); updatePositions();
   animateTo(target, vb, instant);
-  renderMembers(); renderChrome(); renderPanel(); save();
+  renderMembers(); renderChrome(); renderPanel(); renderHeat(); renderGroups(); save();
 }
 
-function addMember(name, type, ident) {
+function addMember(name, type, ident, tags) {
   if (members.length >= MAX_MEMBERS) return false;
-  members.push({ id:nextId++, name:(name || '').trim().slice(0, 16) || `メンバー${members.length + 1}`, type, ident:IDENT[ident] ? ident : '' });
+  members.push({ id:nextId++, name:(name || '').trim().slice(0, 16) || `メンバー${members.length + 1}`, type, ident:IDENT[ident] ? ident : '', nen:'', tags:normTags(tags) });
   return true;
 }
 
@@ -1171,11 +1416,13 @@ document.getElementById('bulkAdd').addEventListener('click', () => {
   const ta = document.getElementById('bulkInput');
   const lines = ta.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
   let added = 0, bad = 0, full = 0;
-  for (const line of lines) {
+  for (const raw of lines) {
+    const tags = (raw.match(/[#＃][^\s#＃,、，]+/g) || []);
+    const line = raw.replace(/[#＃][^\s#＃,、，]+/g, ' ').trim();
     const m = line.toUpperCase().match(/\b([EI][NS][TF][JP])(?:-([AT]))?\b/);
     if (!m) { bad++; continue; }
     const name = line.replace(new RegExp(m[0].replace('-', '\\-'), 'i'), '').replace(/[,、，:：\t|]/g, ' ').trim();
-    if (!addMember(name, m[1], m[2] || '')) { full++; continue; }
+    if (!addMember(name, m[1], m[2] || '', tags)) { full++; continue; }
     added++;
   }
   if (!added) { say(lines.length ? '読み取れる行がありませんでした。「名前 INFJ」または「名前 INFJ-A」の形で入力してください' : '貼り付け欄が空です', true); return; }
@@ -1247,6 +1494,10 @@ document.querySelector('.side').addEventListener('click', e => {
   if (t.dataset.pair) { const [a, b] = t.dataset.pair.split(',').map(Number); selectPair(a, b); return; }
   if (t.dataset.act === 'overview') { toOverview(); return; }
   if (t.dataset.act === 'unpair') { clearPair(); return; }
+  if (t.dataset.act === 'mizumi') { const mz = detail.querySelector('.mizumi'); if (mz) mz.replaceWith(mz.cloneNode(true)); return; }
+  if (t.dataset.act === 'groupTag') { tagGroups(); return; }
+  if (t.dataset.act === 'groupRetry') { runGroups(true); return; }
+  if (t.dataset.tagpick) { state.tag = t.dataset.tagpick; state.pair = null; refresh(); return; }
 });
 
 backBtn.addEventListener('click', toOverview);
@@ -1297,7 +1548,7 @@ function pairTipHTML(a, b) {
 }
 
 function memberTipHTML(m) {
-  const r = members.filter(o => o.id !== m.id).map(o => ({ o, c:compat(keyOf(m), keyOf(o)) }))
+  const r = shown.filter(o => o.id !== m.id).map(o => ({ o, c:compat(keyOf(m), keyOf(o)) }))
     .sort((p, q) => q.c.score - p.c.score || p.o.id - q.o.id);
   const row = ({ o, c }) => `<li class="mp">${personChip(o)}<span class="num">${c.score}</span><span class="tier ${c.tier.key}">${c.tier.name}</span></li>`;
   const best = r.filter(x => x.c.score === r[0].c.score).slice(0, 3);
@@ -1334,7 +1585,7 @@ function hoverAt(target, x, y) {
     if (n) {
       const m = byId(+n.dataset.id);
       setHover(m.id);
-      if (members.length >= 2) showTip('m' + m.id, () => memberTipHTML(m), x, y); else hideTip();
+      if (shown.length >= 2) showTip('m' + m.id, () => memberTipHTML(m), x, y); else hideTip();
     } else if (ed) {
       const a = byId(+ed.dataset.a), b = byId(+ed.dataset.b);
       setHover(null, pairKeyOf(a.id, b.id));
@@ -1485,18 +1736,551 @@ appTitle.addEventListener('pointerdown', () => {
 ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => appTitle.addEventListener(t, cancelPress));
 appTitle.addEventListener('contextmenu', e => e.preventDefault());
 detail.addEventListener('change', e => {
-  const t = e.target; if (!t.dataset.nen) return;
+  const t = e.target;
+  if (t.dataset.tags) {
+    const m = byId(+t.dataset.tags); if (!m) return;
+    m.tags = normTags(t.value); state.isSample = false;
+    refresh();
+    return;
+  }
+  if (!t.dataset.nen) return;
   const m = byId(+t.dataset.nen); if (!m) return;
   m.nen = NEN[t.value] ? t.value : '';
   overviewPos = forceLayout(overviewPos);
   refresh();
 });
 
+/* ---------- teams ---------- */
+const teamSelect = document.getElementById('teamSelect');
+const teamRenameForm = document.getElementById('teamRenameForm');
+const teamNameInput = document.getElementById('teamNameInput');
+const teamDeleteBtn = document.getElementById('teamDelete');
+function renderTeams() {
+  teamSelect.innerHTML = teams.map(t => `<option value="${t.id}"${t.id === teamId ? ' selected' : ''}>${esc(t.name)}（${t.id === teamId ? members.length : t.members.length}人）</option>`).join('');
+}
+function resetView() {
+  cancelAnimationFrame(anim);
+  state.mode = 'overview'; state.focusId = null; state.pair = null; state.tag = ''; state.query = '';
+  document.getElementById('searchInput').value = '';
+  groupResult = null; overviewPos = {}; pos = {};
+  document.getElementById('shareBox').hidden = true;
+}
+function switchTeam(id) {
+  save(); useTeam(id); resetView(); refresh(true);
+}
+teamSelect.addEventListener('change', () => switchTeam(+teamSelect.value));
+document.getElementById('teamNew').addEventListener('click', () => {
+  if (teams.length >= MAX_TEAMS) { say(`チームは${MAX_TEAMS}個までです`, true); return; }
+  save();
+  const t = makeTeam('新しいチーム', [], false);
+  teams.push(t);
+  switchTeam(t.id);
+  say('新しいチームを作りました。「名前変更」で名前を付けられます');
+  document.getElementById('nameInput').focus();
+});
+document.getElementById('teamRename').addEventListener('click', () => {
+  teamRenameForm.hidden = false; teamNameInput.value = curTeam().name; teamNameInput.focus(); teamNameInput.select();
+});
+document.getElementById('teamRenameCancel').addEventListener('click', () => { teamRenameForm.hidden = true; });
+teamRenameForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const v = teamNameInput.value.trim().slice(0, 24);
+  if (!v) { say('チーム名を入れてください', true); return; }
+  const t = curTeam();
+  if (v !== t.name) t.name = teams.some(x => x !== t && x.name === v) ? uniqueTeamName(v) : v;
+  teamRenameForm.hidden = true; renderTeams(); save();
+  say(`チーム名を「${t.name}」にしました`);
+});
+let teamDelTimer = 0;
+teamDeleteBtn.addEventListener('click', () => {
+  if (teamDeleteBtn.dataset.armed !== '1') {
+    teamDeleteBtn.dataset.armed = '1'; teamDeleteBtn.textContent = 'もう一度で削除';
+    clearTimeout(teamDelTimer);
+    teamDelTimer = setTimeout(() => { teamDeleteBtn.dataset.armed = ''; teamDeleteBtn.textContent = '削除'; }, 3000);
+    return;
+  }
+  clearTimeout(teamDelTimer); teamDeleteBtn.dataset.armed = ''; teamDeleteBtn.textContent = '削除';
+  const name = curTeam().name;
+  teams = teams.filter(t => t.id !== teamId);
+  if (!teams.length) teams.push(makeTeam('チーム1', [], false));
+  useTeam(teams[0].id); resetView(); refresh(true);
+  say(`チーム「${name}」を削除しました`);
+});
+
+/* ---------- tags & search ---------- */
+function tagEditor(m) {
+  return `<div class="tagedit">
+      <label for="tags-${m.id}">タグ</label>
+      <input class="field" id="tags-${m.id}" data-tags="${m.id}" value="${esc(m.tags.join(' '))}" placeholder="例: 営業 新人" autocomplete="off">
+      <p>スペース区切りで8個まで。${m.tags.length ? `絞り込み: ${m.tags.map(t => `<button type="button" class="chipbtn" data-tagpick="${esc(t)}">#${esc(t)}</button>`).join('')}` : 'マップ上部でタグごとに絞り込めます'}</p>
+    </div>`;
+}
+detail.addEventListener('keydown', e => {
+  if (e.target.dataset && e.target.dataset.tags && e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+});
+const searchInput = document.getElementById('searchInput');
+const searchCount = document.getElementById('searchCount');
+const tagFilter = document.getElementById('tagFilter');
+const heatSort = document.getElementById('heatSort');
+function matchQuery(m, q) {
+  q = q.toLowerCase().replace(/^[#＃]/, '');
+  return m.name.toLowerCase().includes(q) || codeOf(m).toLowerCase().includes(q) || DESC[m.type].includes(q)
+    || m.tags.some(t => t.toLowerCase().includes(q)) || (state.aura && NEN[nenOf(m)].name.includes(q));
+}
+function searchHits() {
+  const q = state.query.trim();
+  return q ? shown.filter(m => matchQuery(m, q)) : [];
+}
+function applySearch() {
+  const q = state.query.trim();
+  const hits = new Set(searchHits().map(m => m.id));
+  svg.classList.toggle('searching', !!q);
+  for (const id in sceneNodes) sceneNodes[id].classList.toggle('qhit', hits.has(+id));
+  for (const e of sceneEdges) e.g.classList.toggle('qhit', hits.has(e.a) || hits.has(e.b));
+  memberList.classList.toggle('searching', !!q);
+  memberList.querySelectorAll('.mem').forEach(li => li.classList.toggle('qhit', !!q && members.some(m => m.id === +li.dataset.id && matchQuery(m, q))));
+  const table = heat.querySelector('table');
+  if (table) {
+    table.classList.toggle('searching', !!q);
+    table.querySelectorAll('[data-id]').forEach(n => n.classList.toggle('qhit', hits.has(+n.dataset.id)));
+  }
+  searchCount.textContent = q ? `${hits.size}件` : '';
+}
+searchInput.addEventListener('input', () => { state.query = searchInput.value; applySearch(); });
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { searchInput.value = ''; state.query = ''; applySearch(); return; }
+  if (e.key === 'Enter') {
+    const hits = searchHits();
+    if (hits.length === 1) focusOn(hits[0].id);
+  }
+});
+function renderToolbar() {
+  const counts = new Map();
+  members.forEach(m => m.tags.forEach(t => counts.set(t, (counts.get(t) || 0) + 1)));
+  const tags = [...counts].sort((a, b) => a[0].localeCompare(b[0], 'ja'));
+  tagFilter.innerHTML = `<option value="">すべてのタグ</option>` + tags.map(([t, n]) => `<option value="${esc(t)}"${t === state.tag ? ' selected' : ''}>#${esc(t)}（${n}人）</option>`).join('');
+  tagFilter.hidden = !tags.length;
+  document.querySelectorAll('.seg [data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
+  heatSort.hidden = state.view !== 'heat';
+  heatSort.value = state.heatSort;
+}
+tagFilter.addEventListener('change', () => { state.tag = tagFilter.value; state.pair = null; refresh(); });
+document.querySelector('.seg').addEventListener('click', e => {
+  const b = e.target.closest('[data-view]'); if (!b || b.dataset.view === state.view) return;
+  state.view = b.dataset.view; hideTip();
+  renderChrome(); renderHeat();
+});
+heatSort.addEventListener('change', () => { state.heatSort = heatSort.value; renderHeat(); });
+
+/* ---------- heatmap ---------- */
+const heat = document.getElementById('heat');
+function placeHeat() {
+  const mh = document.getElementById('maphead'), mf = document.querySelector('.mapfoot');
+  heat.style.top = (mh.offsetTop + mh.offsetHeight + 8) + 'px';
+  heat.style.bottom = (mf.offsetHeight + 20) + 'px';
+}
+function heatOrder() {
+  const list = shown.slice();
+  if (state.heatSort === 'type') {
+    const go = { nt:0, nf:1, sj:2, sp:3 };
+    list.sort((a, b) => (state.aura ? NEN_ORDER.indexOf(nenOf(a)) - NEN_ORDER.indexOf(nenOf(b)) : go[groupOf(a.type)] - go[groupOf(b.type)])
+      || a.type.localeCompare(b.type) || a.id - b.id);
+  }
+  return list;
+}
+function renderHeat() {
+  const on = state.view === 'heat';
+  heat.hidden = !on;
+  svg.style.visibility = on ? 'hidden' : '';
+  if (!on) { heat.innerHTML = ''; return; }
+  placeHeat();
+  const list = heatOrder();
+  if (list.length < 2) { heat.innerHTML = `<p class="muted heatempty">${state.tag ? `タグ「#${esc(state.tag)}」のメンバーが2人未満です` : '2人以上そろうと相性表が表示されます'}</p>`; return; }
+  const span = MAX_SCORE - MIN_SCORE;
+  heat.innerHTML = `<table class="heat">
+    <thead><tr><th class="corner" scope="col">${list.length}人</th>${list.map(m => `<th scope="col" class="ch" data-id="${m.id}" title="${esc(m.name)}（${labelOf(m)}）"><span class="chn">${esc(m.name)}</span><span class="tb ${skinOf(m)}">${iconFor(m)}</span></th>`).join('')}</tr></thead>
+    <tbody>${list.map(a => `<tr data-id="${a.id}"><th scope="row" class="rh" data-id="${a.id}"><span class="who2">${personChip(a)}</span></th>${list.map(b => {
+      if (a.id === b.id) return '<td class="self" aria-label="本人">—</td>';
+      const c = compat(keyOf(a), keyOf(b));
+      return `<td class="hc ${c.tier.key}" data-a="${a.id}" data-b="${b.id}" style="--s:${(.2 + .8 * (c.score - MIN_SCORE) / span).toFixed(2)}">${c.score}</td>`;
+    }).join('')}</tr>`).join('')}</tbody></table>`;
+  applySearch();
+  markHeatPair();
+}
+function markHeatPair() {
+  heat.querySelectorAll('td.sel').forEach(td => td.classList.remove('sel'));
+  if (!state.pair || heat.hidden) return;
+  const [a, b] = state.pair;
+  heat.querySelectorAll(`td[data-a="${a}"][data-b="${b}"],td[data-a="${b}"][data-b="${a}"]`).forEach(td => td.classList.add('sel'));
+}
+heat.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  const td = e.target.closest('td.hc');
+  if (!td) { hideTip(); return; }
+  const a = byId(+td.dataset.a), b = byId(+td.dataset.b);
+  showTip('h' + pairKeyOf(a.id, b.id), () => pairTipHTML(a, b), e.clientX, e.clientY);
+});
+heat.addEventListener('pointerleave', hideTip);
+heat.addEventListener('click', e => {
+  const td = e.target.closest('td.hc');
+  if (td) { hideTip(); selectPair(+td.dataset.a, +td.dataset.b); return; }
+  const th = e.target.closest('th[data-id]');
+  if (th) { hideTip(); focusOn(+th.dataset.id); }
+});
+
+/* ---------- team bias ---------- */
+const BIAS = {
+  E:['外向型（E）', 'ノリよく話が進む一方、静かに考えたい人の意見が埋もれがち。書いて意見を出す時間をつくると◎'],
+  I:['内向型（I）', '落ち着いて深く考えられる一方、発言や雑談が少なくなりがち。進行役を決めておくと◎'],
+  N:['直観型（N）', 'アイデアは豊富な一方、期限・数字・手順の確認が抜けやすい。チェック役を決めておくと◎'],
+  S:['感覚型（S）', '実務は堅実な一方、新しいやり方や長期の方向性の話が後回しになりがち。未来を話す時間を意識して'],
+  T:['思考型（T）', '論理的で決断が速い一方、気持ちへの配慮が後回しになりがち。決める前に「どう感じる？」をひと言'],
+  F:['感情型（F）', '雰囲気は温かい一方、言いにくい指摘や厳しい判断を先送りしがち。判断の基準を先に決めておくと◎'],
+  J:['計画型（J）', '計画的で締め切りに強い一方、予定外の変化に弱くなりがち。予備日や代わりの案を用意しておいて'],
+  P:['柔軟型（P）', '柔軟で臨機応変な一方、締め切りや決め事が後回しになりがち。期限はカレンダーやツールに任せて'],
+  idA:['自己主張型（A）', '動じにくく安定している一方、リスクや反省点を見落としがち。振り返りの場を定期的に'],
+  idT:['慎重型（T）', '向上心が強い一方、プレッシャーを抱え込みがち。不安を気軽に言葉にできる場を']
+};
+const MISSING = {
+  nt:'NT 理論派がいません。仕組みや戦略を考える役が手薄かもしれません',
+  nf:'NF 理想派がいません。チームの意義や人の気持ちに目を向ける役が手薄かもしれません',
+  sj:'SJ 堅実派がいません。ルールや手順を整えて守る役が手薄かもしれません',
+  sp:'SP 行動派がいません。その場で素早く動くトラブル対応役が手薄かもしれません'
+};
+function biasHTML(list) {
+  const n = list.length;
+  if (n < 3) return '';
+  const notes = [];
+  for (const [i, a, b] of [[0,'E','I'],[1,'N','S'],[2,'T','F'],[3,'J','P']]) {
+    const ca = list.filter(m => m.type[i] === a).length, cb = n - ca;
+    const side = ca >= cb ? a : b, r = Math.max(ca, cb) / n;
+    if (r >= .7) notes.push(`<li><b>${BIAS[side][0]}が${Math.round(r * 100)}%</b><span>${BIAS[side][1]}</span></li>`);
+  }
+  const known = list.filter(m => m.ident);
+  if (known.length >= 3) {
+    const a = known.filter(m => m.ident === 'A').length, r = Math.max(a, known.length - a) / known.length;
+    const side = a >= known.length - a ? 'idA' : 'idT';
+    if (r >= .75) notes.push(`<li><b>${BIAS[side][0]}が${Math.round(r * 100)}%（A/T入力済み${known.length}人中）</b><span>${BIAS[side][1]}</span></li>`);
+  }
+  if (n >= 6) for (const g of ['nt','nf','sj','sp']) if (!list.some(m => groupOf(m.type) === g)) notes.push(`<li><b>${GROUPS[g]}が0人</b><span>${MISSING[g]}</span></li>`);
+  return `<h3>チームの傾向</h3>` + (notes.length
+    ? `<ul class="bias">${notes.join('')}</ul>`
+    : `<ul class="bias ok"><li><b>バランスの取れたチーム</b><span>4つの指標に大きな偏りはありません。いろいろな視点が集まりやすい構成です。</span></li></ul>`);
+}
+
+/* ---------- grouping ---------- */
+const groupCount = document.getElementById('groupCount');
+const groupResultEl = document.getElementById('groupResult');
+let groupSeed = 1;
+const groupKey = () => (state.aura ? 'a' : 'm') + shown.map(m => m.id + keyOf(m)).join('|');
+function rng(seed) { let x = (seed >>> 0) || 1; return () => (x = (x * 1664525 + 1013904223) >>> 0) / 4294967296; }
+// 班の人数は均等（差は最大1人）のまま、班の中の相性スコアの合計が大きくなるよう入れ替えを繰り返す
+function proposeGroups(list, k, seed) {
+  const n = list.length;
+  const S = list.map(a => list.map(b => a === b ? 0 : compat(keyOf(a), keyOf(b)).score));
+  const R = rng(seed);
+  let best = null, bestTotal = -Infinity;
+  for (let r = 0; r < 12; r++) {
+    const idx = list.map((_, i) => i);
+    for (let i = n - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    const g = new Array(n);
+    idx.forEach((v, p) => { g[v] = p % k; });
+    const contrib = (i, grp) => { let t = 0; for (let x = 0; x < n; x++) if (x !== i && g[x] === grp) t += S[i][x]; return t; };
+    for (let pass = 0; pass < 40; pass++) {
+      let improved = false;
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+        if (g[i] === g[j]) continue;
+        const A = g[i], B = g[j];
+        const d = (contrib(i, B) - S[i][j]) + (contrib(j, A) - S[i][j]) - contrib(i, A) - contrib(j, B);
+        if (d > 1e-9) { g[i] = B; g[j] = A; improved = true; }
+      }
+      if (!improved) break;
+    }
+    let total = 0;
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (g[i] === g[j]) total += S[i][j];
+    if (total > bestTotal) { bestTotal = total; best = g.slice(); }
+  }
+  const groups = Array.from({ length:k }, () => []);
+  best.forEach((grp, i) => groups[grp].push(list[i]));
+  const stats = g => {
+    let sum = 0, cnt = 0, weak = null;
+    for (let i = 0; i < g.length; i++) for (let j = i + 1; j < g.length; j++) {
+      const c = compat(keyOf(g[i]), keyOf(g[j]));
+      sum += c.score; cnt++;
+      if (!weak || c.score < weak.score) weak = { a:g[i], b:g[j], score:c.score };
+    }
+    return { members:g, avg:cnt ? Math.round(sum / cnt) : 0, weak };
+  };
+  return groups.map(stats).sort((p, q) => q.avg - p.avg);
+}
+function renderGroupOptions() {
+  const n = shown.length;
+  const max = Math.max(2, Math.min(10, Math.floor(n / 2)));
+  const prev = +groupCount.value;
+  const cur = prev >= 2 && prev <= max ? prev : Math.min(max, Math.max(2, Math.round(n / 5)));
+  groupCount.innerHTML = Array.from({ length:max - 1 }, (_, i) => i + 2)
+    .map(k => `<option value="${k}"${k === cur ? ' selected' : ''}>${k}班（1班${Math.floor(n / k)}${n % k ? `〜${Math.ceil(n / k)}` : ''}人）</option>`).join('');
+}
+function renderGroups() {
+  renderGroupOptions();
+  const enough = shown.length >= 4;
+  groupCount.disabled = !enough;
+  document.getElementById('groupRun').disabled = !enough;
+  if (!enough) { groupResult = null; groupResultEl.innerHTML = '<p class="muted">4人以上そろうと、班分けを提案できます。</p>'; return; }
+  if (!groupResult || groupResult.key !== groupKey()) {
+    groupResult = null;
+    groupResultEl.innerHTML = `<p class="muted">班の数を選んで「提案する」を押すと、班の中の相性がなるべく良くなる分け方を提案します${state.tag ? `（#${esc(state.tag)} のメンバーが対象）` : ''}。</p>`;
+    return;
+  }
+  groupResultEl.innerHTML = groupResult.groups.map((g, i) => `<div class="grp">
+      <div class="grph"><b>${i + 1}班</b><span class="code">${g.members.length}人</span><span class="num">平均 ${g.avg}</span><span class="tier ${tierOf(g.avg).key}">${tierOf(g.avg).name}</span></div>
+      <div class="grpm">${g.members.map(m => `<button type="button" class="chipbtn" data-focus="${m.id}">${personChip(m)}</button>`).join('')}</div>
+      ${g.weak ? `<p class="grpw">いちばん歩み寄りが大事なのは ${esc(g.weak.a.name)} × ${esc(g.weak.b.name)}（${g.weak.score}点）</p>` : ''}
+    </div>`).join('') + `<div class="actions">
+      <button type="button" class="btn ghost small" data-act="groupTag">班をタグとして保存</button>
+      <button type="button" class="btn ghost small" data-act="groupRetry">別の分け方を見る</button>
+    </div>`;
+}
+function runGroups(another) {
+  if (shown.length < 4) return;
+  if (another) groupSeed++; else groupSeed = 1;
+  const k = +groupCount.value || 2;
+  groupResult = { key:groupKey(), groups:proposeGroups(shown, k, groupSeed * 7919) };
+  renderGroups();
+}
+document.getElementById('groupRun').addEventListener('click', () => runGroups(false));
+function tagGroups() {
+  if (!groupResult) return;
+  const ids = new Set(shown.map(m => m.id));
+  members.forEach(m => { if (ids.has(m.id)) m.tags = m.tags.filter(t => !/^\d+班$/.test(t)); });
+  groupResult.groups.forEach((g, i) => g.members.forEach(m => { m.tags = normTags([...m.tags, `${i + 1}班`]); }));
+  const saved = groupResult;
+  state.isSample = false;
+  refresh();
+  groupResult = { ...saved, key:groupKey() };
+  renderGroups();
+  say('班を「1班」「2班」…のタグとして保存しました。マップ上部のタグで班ごとに表示できます');
+}
+
+/* ---------- 水見式 ---------- */
+function mizumiHTML(k) {
+  const glass = 'M52 34 L108 34 L103 112 Q102.5 116 98 116 L62 116 Q57.5 116 57 112 Z';
+  return `<div class="mizumi mz-${k} tyc nen-${k}">
+    <svg viewBox="0 0 160 132" role="img" aria-label="水見式：${NEN[k].water}">
+      <defs><clipPath id="mzclip"><path d="${glass}"/></clipPath></defs>
+      <ellipse class="mz-aura" cx="80" cy="76" rx="64" ry="56"/>
+      <g clip-path="url(#mzclip)">
+        <rect class="mz-water" x="40" y="54" width="80" height="80"/>
+        <g class="mz-dust"><circle cx="68" cy="84" r="2.2"/><circle cx="84" cy="97" r="1.8"/><circle cx="93" cy="79" r="2.4"/><circle cx="74" cy="105" r="1.6"/><path d="M86 88l3 2-2 3z"/><path d="M63 96l3-1 1 3z"/></g>
+        <g class="mz-bubbles"><circle cx="70" cy="110" r="2"/><circle cx="88" cy="112" r="1.6"/><circle cx="80" cy="106" r="2.4"/><circle cx="94" cy="104" r="1.4"/></g>
+      </g>
+      <g class="mz-leafwrap"><path class="mz-leaf" d="M71 53 C 75 45.5, 88 45.5, 93 53 C 88 59, 75 59, 71 53 Z"/><path class="mz-vein" d="M72 53 H 91"/></g>
+      <path class="mz-glass" d="${glass}"/>
+      <g class="mz-drops"><circle cx="51" cy="38" r="2.4"/><circle cx="110" cy="42" r="2"/><circle cx="54" cy="50" r="1.8"/><circle cx="107" cy="54" r="1.6"/></g>
+      <g class="mz-spark"><path d="M114 28l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M42 64l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z"/></g>
+    </svg>
+    <p class="mz-cap"><b>水見式</b>${NEN[k].water}${k === 'henka' ? '（なめると分かる）' : ''}</p>
+    <button type="button" class="btn ghost small mz-replay" data-act="mizumi">もう一度</button>
+  </div>`;
+}
+
+/* ---------- share link ---------- */
+function b64urlEncode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function b64urlDecode(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const bin = atob(s);
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+const packMembers = list => list.map(m => [m.name, codeOf(m), m.nen || '', m.tags.join(' ')]);
+function readHash() {
+  const parts = location.hash.replace(/^#/, '').split('&').filter(Boolean);
+  const t = parts.find(x => x.startsWith('t='));
+  return { aura:parts.includes('aura'), t:t ? t.slice(2) : '' };
+}
+function importShared(code) {
+  let msg = '';
+  try {
+    const d = JSON.parse(b64urlDecode(code));
+    const list = (d.m || []).map(a => ({ name:a[0], type:a[1], nen:a[2], tags:a[3] }));
+    const incoming = makeTeam(d.n || '共有チーム', list, false);
+    if (incoming.members.length) {
+      const sig = JSON.stringify(packMembers(incoming.members));
+      const same = teams.find(t => JSON.stringify(packMembers(t.members)) === sig);
+      if (same) { useTeam(same.id); msg = `共有されたチーム「${same.name}」を開きました`; }
+      else if (teams.length >= MAX_TEAMS) msg = `チームが${MAX_TEAMS}個あるため、共有されたチームを追加できませんでした`;
+      else { teams.push(incoming); useTeam(incoming.id); msg = `共有されたチーム「${incoming.name}」（${incoming.members.length}人）を追加しました`; }
+    }
+  } catch (e) { msg = '共有リンクを読み取れませんでした。リンクが途中で切れていないか確認してください'; }
+  history.replaceState(null, '', location.pathname + location.search + (readHash().aura ? '#aura' : ''));
+  return msg;
+}
+const toolMsg = document.getElementById('toolMsg');
+function toolSay(msg, err) { toolMsg.textContent = msg; toolMsg.classList.toggle('err', !!err); }
+const shareUrl = document.getElementById('shareUrl');
+document.getElementById('shareBtn').addEventListener('click', () => {
+  if (!members.length) { toolSay('メンバーがいないチームは共有できません', true); return; }
+  const code = b64urlEncode(JSON.stringify({ v:1, n:curTeam().name, m:packMembers(members) }));
+  shareUrl.value = `${location.origin}${location.pathname}#t=${code}${state.aura ? '&aura' : ''}`;
+  document.getElementById('shareBox').hidden = false;
+  copyShare();
+});
+function copyShare() {
+  const done = () => toolSay('共有リンクをコピーしました');
+  const fallback = () => { shareUrl.focus(); shareUrl.select(); toolSay('リンクを選択しました。コピーして送ってください'); };
+  try { navigator.clipboard.writeText(shareUrl.value).then(done, fallback); } catch (e) { fallback(); }
+}
+document.getElementById('shareCopy').addEventListener('click', copyShare);
+
+/* ---------- export / import ---------- */
+async function saveBlob(blob, name) {
+  let file = null;
+  try { file = new File([blob], name, { type:blob.type }); } catch (e) {}
+  if (file && matchMedia('(pointer:coarse)').matches && navigator.canShare && navigator.canShare({ files:[file] })) {
+    try { await navigator.share({ files:[file], title:name }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+const safeName = s => String(s).replace(/[\\/:*?"<>|]+/g, '_').slice(0, 40) || 'team';
+const today = () => { const d = new Date(); return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`; };
+const csvCell = v => { v = String(v == null ? '' : v); return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
+document.getElementById('csvBtn').addEventListener('click', () => {
+  if (!members.length) { toolSay('メンバーがいません', true); return; }
+  const rows = [['名前', 'タイプ', 'タグ', '念の系統（手動設定）'], ...members.map(m => [m.name, codeOf(m), m.tags.join(' '), m.nen ? NEN[m.nen].name : ''])];
+  saveBlob(new Blob(['﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type:'text/csv' }), `${safeName(curTeam().name)}_${today()}.csv`);
+  toolSay('CSVを書き出しました');
+});
+document.getElementById('jsonBtn').addEventListener('click', () => {
+  save();
+  const data = { app:'mbti-compat-map', version:2, exportedAt:new Date().toISOString(),
+    teams:teams.map(t => ({ name:t.name, members:t.members.map(m => ({ name:m.name, type:m.type, ident:m.ident, nen:m.nen, tags:m.tags })) })) };
+  saveBlob(new Blob([JSON.stringify(data, null, 2)], { type:'application/json' }), `mbti-teams_${today()}.json`);
+  toolSay(`${teams.length}チームを書き出しました`);
+});
+const importFile = document.getElementById('importFile');
+document.getElementById('importBtn').addEventListener('click', () => importFile.click());
+function parseCSV(text) {
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',') { row.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += ch;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()));
+}
+importFile.addEventListener('change', async () => {
+  const file = importFile.files && importFile.files[0];
+  importFile.value = '';
+  if (!file) return;
+  try {
+    const text = (await file.text()).replace(/^﻿/, '');
+    const base = file.name.replace(/\.[^.]+$/, '');
+    const incoming = [];
+    if (/\.json$/i.test(file.name) || /^\s*[{[]/.test(text)) {
+      const d = JSON.parse(text);
+      const list = Array.isArray(d.teams) ? d.teams : Array.isArray(d.members) ? [d] : Array.isArray(d) ? [{ name:base, members:d }] : [];
+      list.forEach(t => incoming.push({ name:t.name || base, members:t.members || [] }));
+    } else {
+      const rows = parseCSV(text);
+      if (rows.length && /名前|name/i.test(rows[0][0])) rows.shift();
+      const nenByName = Object.fromEntries(NEN_ORDER.map(k => [NEN[k].name, k]));
+      incoming.push({ name:base, members:rows.map(r => ({ name:r[0], type:r[1], tags:r[2], nen:nenByName[(r[3] || '').trim()] || '' })) });
+    }
+    let added = 0, first = null;
+    save();
+    for (const t of incoming) {
+      if (teams.length >= MAX_TEAMS) break;
+      const nt = makeTeam(t.name, t.members, false);
+      if (!nt.members.length) continue;
+      teams.push(nt); added++; if (!first) first = nt;
+    }
+    if (!first) { toolSay('読み込めるメンバーが見つかりませんでした。書き出したJSONか「名前,タイプ,タグ」のCSVを選んでください', true); return; }
+    useTeam(first.id); resetView(); refresh(true);
+    toolSay(`${added}チームを読み込みました（${first.name} を表示中）`);
+  } catch (e) {
+    toolSay('ファイルを読み込めませんでした。書き出したJSONか「名前,タイプ,タグ」のCSVを選んでください', true);
+  }
+});
+
+/* ---------- image export ---------- */
+const STYLE_PROPS = ['fill','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-dasharray','stroke-linecap','stroke-linejoin','opacity','font-family','font-size','font-weight','letter-spacing','text-anchor','dominant-baseline','display'];
+document.getElementById('pngBtn').addEventListener('click', async () => {
+  if (!shown.length) { toolSay('表示中のメンバーがいません', true); return; }
+  toolSay('画像を作っています…');
+  try {
+    const clone = svg.cloneNode(true);
+    const src = [svg, ...svg.querySelectorAll('*')], dst = [clone, ...clone.querySelectorAll('*')];
+    src.forEach((n, i) => {
+      const cs = getComputedStyle(n);
+      dst[i].setAttribute('style', STYLE_PROPS.map(p => `${p}:${cs.getPropertyValue(p)}`).join(';'));
+    });
+    clone.querySelectorAll('.hit').forEach(n => n.remove());
+    const W = 1600, H = Math.round(W * viewBox.h / viewBox.w);
+    clone.setAttribute('xmlns', NS);
+    clone.setAttribute('width', W); clone.setAttribute('height', H);
+    clone.style.visibility = 'visible';
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+    await img.decode();
+    const css = getComputedStyle(document.documentElement);
+    const v = name => css.getPropertyValue(name).trim();
+    const head = 120, foot = 84;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H + head + foot;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = v('--surface'); ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = v('--ink');
+    ctx.font = `700 44px ${v('--display')}`;
+    ctx.fillText(`${curTeam().name}　${(state.tag ? `#${state.tag} · ` : '') + (state.mode === 'focus' ? `${byId(state.focusId).name}から見た相性` : '全体マップ')}`, 48, 70);
+    ctx.fillStyle = v('--ink-2');
+    ctx.font = `400 24px ${v('--body')}`;
+    const d = new Date();
+    ctx.fillText(`${shown.length}人 · ${state.aura ? 'オーラ（念の六系統）で診断' : 'MBTIで診断'} · ${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`, 48, 104);
+    ctx.drawImage(img, 0, head, W, H);
+    let x = 48; const y = head + H + 46;
+    ctx.font = `600 24px ${v('--body')}`;
+    for (const t of TIERS) {
+      ctx.strokeStyle = v('--' + t.key); ctx.lineWidth = 6; ctx.setLineDash(t.key === 't4' ? [10, 8] : []);
+      ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.lineTo(x + 40, y - 8); ctx.stroke();
+      ctx.fillStyle = v('--ink'); ctx.fillText(t.name, x + 52, y);
+      x += 52 + ctx.measureText(t.name).width + 40;
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle = v('--ink-2'); ctx.font = `400 20px ${v('--body')}`;
+    ctx.textAlign = 'right'; ctx.fillText(document.title, W - 48, y);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    if (!blob) throw new Error('toBlob');
+    await saveBlob(blob, `${safeName(curTeam().name)}_相性マップ_${today()}.png`);
+    toolSay(state.view === 'heat' ? 'マップを画像で保存しました（相性表ではなくマップの画像です）' : 'マップを画像で保存しました');
+  } catch (e) {
+    toolSay('画像を作れませんでした。別のブラウザで試してください', true);
+  }
+});
+
 /* ---------- boot ---------- */
-if (!load() || (!members.length && !state.isSample)) { if (!members.length) loadSample(); }
-try { state.aura = location.hash === '#aura' || localStorage.getItem(AURA_KEY) === '1'; } catch (e) { state.aura = location.hash === '#aura'; }
+if (!load()) loadSample();
+const bootHash = readHash();
+try { state.aura = bootHash.aura || localStorage.getItem(AURA_KEY) === '1'; } catch (e) { state.aura = bootHash.aura; }
 renderAuraChrome();
+const sharedMsg = bootHash.t ? importShared(bootHash.t) : '';
 refresh(true);
+if (sharedMsg) showToast(sharedMsg);
+addEventListener('resize', placeHeat);
 })();
 </script>
 </body>
