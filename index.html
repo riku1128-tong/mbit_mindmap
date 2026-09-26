@@ -214,6 +214,10 @@ button.tb:hover{filter:brightness(1.12)}
 .tagedit{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--ink-2)}
 .tagedit .field{height:32px}
 .tagedit p{grid-column:1 / -1;margin:0;font-size:11px}
+.teammove{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px 8px;margin-top:12px;font-size:12px;color:var(--ink-2)}
+.teammove .field{height:32px}
+.teammove p{grid-column:1 / -1;margin:0;font-size:11px}
+.teammove .btns{grid-column:1 / -1;display:flex;gap:6px;justify-content:flex-end}
 .bias{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:12.5px}
 .bias li{border-left:3px solid var(--t4);padding-left:10px}
 .bias b{display:block}
@@ -1282,6 +1286,7 @@ function renderMember(id) {
     </div>
     ${mizumiHTML(k)}
     ${tagEditor(m)}
+    ${teamMover(m)}
     ${hexSVG('rate', k)}
     <p class="muted">水見式では「${NEN[k].water}」タイプ。${m.nen ? '系統は手動で設定しています。' : `${codeOf(m)}（${DESC[m.type]}）から判定しました。`}</p>
     <label class="nensel" for="nen-${m.id}">系統
@@ -1301,6 +1306,7 @@ function renderMember(id) {
       <div><div class="nm">${esc(m.name)}</div><div class="sub"><span class="code">${codeOf(m)}</span> ${DESC[m.type]} · ${GROUPS[groupOf(m.type)]}${m.ident ? ` · ${IDENT[m.ident]}（${m.ident}）` : ''}</div></div>
     </div>
     ${tagEditor(m)}
+    ${teamMover(m)}
     <div class="fns">${st.map((f, i) => `<div class="fn"><small>${labels[i]}</small><b>${f}</b><span>${FN_NAME[f]}</span></div>`).join('')}</div>
     <h3>相性ランキング</h3>
     ${rankList}`;
@@ -1496,6 +1502,7 @@ document.querySelector('.side').addEventListener('click', e => {
   if (t.dataset.act === 'unpair') { clearPair(); return; }
   if (t.dataset.act === 'mizumi') { const mz = detail.querySelector('.mizumi'); if (mz) mz.replaceWith(mz.cloneNode(true)); return; }
   if (t.dataset.act === 'groupTag') { tagGroups(); return; }
+  if (t.dataset.act === 'moveMember' || t.dataset.act === 'copyMember') { transferMember(+t.dataset.id, t.dataset.act === 'moveMember'); return; }
   if (t.dataset.act === 'groupRetry') { runGroups(true); return; }
   if (t.dataset.tagpick) { state.tag = t.dataset.tagpick; state.pair = null; refresh(); return; }
 });
@@ -1806,6 +1813,38 @@ teamDeleteBtn.addEventListener('click', () => {
   useTeam(teams[0].id); resetView(); refresh(true);
   say(`チーム「${name}」を削除しました`);
 });
+
+/* ---------- move / copy a member to another team ---------- */
+function teamMover(m) {
+  const others = teams.filter(t => t.id !== teamId);
+  if (!others.length) return `<div class="teammove"><p>移動先のチームがありません。メンバー欄の「＋ 新規」でチームを作ると、ここから移動・コピーできます。</p></div>`;
+  return `<div class="teammove">
+      <label for="moveTo-${m.id}">別のチームへ</label>
+      <select class="field" id="moveTo-${m.id}" data-moveto="${m.id}">${others.map(t => `<option value="${t.id}">${esc(t.name)}（${t.members.length}人）</option>`).join('')}</select>
+      <div class="btns">
+        <button type="button" class="btn ghost small" data-act="moveMember" data-id="${m.id}">移動する</button>
+        <button type="button" class="btn ghost small" data-act="copyMember" data-id="${m.id}">コピーする</button>
+      </div>
+      <p>タイプ・A/T・タグ・念の系統ごと移します。コピーはこのチームにも残ります。</p>
+    </div>`;
+}
+function transferMember(id, move) {
+  const m = byId(id);
+  const sel = detail.querySelector(`[data-moveto="${id}"]`);
+  const dest = sel && teams.find(t => t.id === +sel.value);
+  if (!m || !dest) return;
+  if (dest.members.length >= MAX_MEMBERS) { say(`「${dest.name}」はすでに${MAX_MEMBERS}人いるため、${move ? '移動' : 'コピー'}できません`, true); return; }
+  dest.members.push({ ...m, tags:m.tags.slice(), id:dest.nextId++ });
+  dest.isSample = false;
+  if (move) {
+    members = members.filter(x => x.id !== id);
+    delete overviewPos[id];
+    state.isSample = false;
+    if (state.focusId === id) { state.mode = 'overview'; state.focusId = null; }
+  }
+  refresh();
+  say(`${m.name}を「${dest.name}」へ${move ? '移動' : 'コピー'}しました`);
+}
 
 /* ---------- tags & search ---------- */
 function tagEditor(m) {
